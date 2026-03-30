@@ -6,6 +6,8 @@
     <title>SAGE - Smart Assessment & Grading Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
@@ -48,67 +50,60 @@
 
     <div id="app">
 
+        <!-- Login View with Faculty + Student Tabs -->
         <div id="view-login" class="min-h-screen flex items-center justify-center p-6 bg-slate-50 relative overflow-hidden fade-in">
             <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
             <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
             
             <div class="max-w-md w-full premium-card overflow-hidden relative z-10 bg-white shadow-2xl">
-                <div class="academic-gradient px-10 py-14 text-center relative">
+                <div class="academic-gradient px-10 py-10 text-center relative">
                     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-                    <i class="ph ph-graduation-cap-fill text-6xl text-blue-400 mb-4 animate-bounce"></i>
+                    <i class="ph ph-graduation-cap-fill text-5xl text-blue-400 mb-3 animate-bounce"></i>
                     <h1 class="text-4xl font-serif font-bold text-white tracking-tight">SAGE</h1>
-                    <p class="text-blue-100/80 text-sm mt-3 font-semibold uppercase tracking-widest">Academic Excellence Engine</p>
+                    <p class="text-blue-100/80 text-sm mt-2 font-semibold uppercase tracking-widest">Academic Excellence Engine</p>
                 </div>
-                
-                <div class="p-8">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Faculty Login</h2>
-                    
-                    <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
-                        Invalid credentials. Please try again.
-                    </div>
 
+                <!-- Tab switcher -->
+                <div class="flex border-b border-slate-100">
+                    <button id="tab-faculty" onclick="switchLoginTab('faculty')" class="flex-1 py-3 text-sm font-black text-blue-600 border-b-2 border-blue-600 transition-all">Faculty Login</button>
+                    <button id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-3 text-sm font-black text-slate-400 border-b-2 border-transparent transition-all">Student Portal</button>
+                </div>
+
+                <!-- Faculty Login Form -->
+                <div id="panel-faculty" class="p-8">
+                    <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">Invalid credentials. Please try again.</div>
                     <form id="login-form" class="space-y-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="email">Institutional Email</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="ph ph-envelope-simple text-gray-400 text-lg"></i>
-                                </div>
-                                <input type="email" id="email" required placeholder="nishantjain@mitsgwalior.in" 
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-academic-500 focus:border-academic-500 transition-colors">
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Institutional Email</label>
+                            <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="ph ph-envelope-simple text-gray-400 text-lg"></i></div>
+                            <input type="email" id="email" required placeholder="faculty@university.in" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors"></div>
                         </div>
-                        
                         <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
-                                <a href="#" class="text-xs text-academic-500 hover:text-academic-700 font-medium transition-colors">Forgot Password?</a>
-                            </div>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="ph ph-lock-key text-gray-400 text-lg"></i>
-                                </div>
-                                <input type="password" id="password" required placeholder="••••••••" 
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-academic-500 focus:border-academic-500 transition-colors">
-                            </div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="ph ph-lock-key text-gray-400 text-lg"></i></div>
+                            <input type="password" id="password" required placeholder="••••••••" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors"></div>
                         </div>
-
-                        <button type="submit" class="w-full sapphire-gradient hover:shadow-xl hover:shadow-blue-500/20 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg mt-6 flex justify-center items-center gap-3 btn-premium">
-                            <span>Access Faculty Portal</span>
-                            <i class="ph ph-arrow-right-bold"></i>
+                        <button type="submit" class="w-full sapphire-gradient text-white font-bold py-3.5 rounded-xl transition-all shadow-lg mt-4 flex justify-center items-center gap-3">
+                            <span>Access Faculty Portal</span><i class="ph ph-arrow-right-bold"></i>
                         </button>
                     </form>
-                    
-                    <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
-                            <i class="ph ph-shield-check text-academic-500 text-sm"></i>
-                            Authorized Faculty Only
-                        </p>
-                    </div>
                 </div>
-            </div>
-            <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-400">
-                Hint: Any email / password will work for this demo.
+
+                <!-- Student Portal Form -->
+                <div id="panel-student" class="p-8 hidden">
+                    <div id="student-error" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">No records found for this enrollment number.</div>
+                    <form id="student-login-form" class="space-y-5">
+                        <p class="text-sm text-slate-500 font-medium text-center">Enter your enrollment number to view your graded reports.</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Number</label>
+                            <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="ph ph-fingerprint text-gray-400 text-lg"></i></div>
+                            <input type="text" id="student-enrollment" required placeholder="e.g. CS250105X" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-colors"></div>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-3">
+                            <span>View My Reports</span><i class="ph ph-arrow-right-bold"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -315,11 +310,113 @@
                         <p class="subheading-premium">Configure your examination parameters and upload source materials.</p>
                     </div>
 
+                    <!-- Course Templates Quick-Select -->
+                    <div class="premium-card p-6 bg-white mb-6 border border-amber-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xs font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                                <i class="ph ph-bookmark-simple-fill"></i> Course Templates
+                            </h3>
+                            <button onclick="saveCurrentAsTemplate()" class="text-xs font-black text-slate-500 hover:text-amber-600 transition-colors flex items-center gap-1 border border-slate-200 px-3 py-1.5 rounded-lg hover:border-amber-300">
+                                <i class="ph ph-floppy-disk"></i> Save Current
+                            </button>
+                        </div>
+                        <div id="templates-list" class="flex flex-wrap gap-2">
+                            <p class="text-xs text-slate-400 font-medium italic">No saved templates yet. Fill in the form below and click "Save Current" to create one.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Upload Section -->
+                    <div class="premium-card p-8 bg-white border border-purple-100 mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-xs font-black text-purple-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <i class="ph ph-archive-fill"></i> Bulk Grade Mode
+                                </h3>
+                                <h2 class="text-xl font-black text-slate-900">Upload ZIP of Student Papers</h2>
+                                <p class="text-sm text-slate-500 font-bold mt-1">Name files as <code class="bg-slate-100 px-1 rounded text-xs">FirstName_LastName_EnrollmentNo.jpg</code> for auto-detection.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- Shared QP -->
+                            <div id="bulk-dropzone-qp" class="relative group cursor-pointer">
+                                <div class="p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 group-hover:border-blue-400 transition-all text-center">
+                                    <i class="ph ph-file-text-fill text-2xl text-slate-300 group-hover:text-blue-500 mb-1 transition-colors"></i>
+                                    <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Shared Question Paper</p>
+                                    <input id="bulk-file-qp" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div id="bulk-display-qp" class="hidden mt-2 p-2 bg-blue-600 rounded-xl flex items-center justify-between text-white text-xs font-bold">
+                                    <span id="bulk-name-qp" class="truncate"></span>
+                                    <button type="button" id="bulk-remove-qp"><i class="ph ph-x"></i></button>
+                                </div>
+                            </div>
+                            <!-- Shared AK -->
+                            <div id="bulk-dropzone-ak" class="relative group cursor-pointer">
+                                <div class="p-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 group-hover:border-emerald-400 transition-all text-center">
+                                    <i class="ph ph-key-fill text-2xl text-slate-300 group-hover:text-emerald-500 mb-1 transition-colors"></i>
+                                    <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Shared Answer Key</p>
+                                    <input id="bulk-file-ak" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div id="bulk-display-ak" class="hidden mt-2 p-2 bg-emerald-600 rounded-xl flex items-center justify-between text-white text-xs font-bold">
+                                    <span id="bulk-name-ak" class="truncate"></span>
+                                    <button type="button" id="bulk-remove-ak"><i class="ph ph-x"></i></button>
+                                </div>
+                            </div>
+                            <!-- ZIP Upload -->
+                            <div id="bulk-dropzone-zip" class="relative group cursor-pointer">
+                                <div class="p-4 border-2 border-dashed border-purple-200 rounded-2xl bg-purple-50 group-hover:border-purple-500 transition-all text-center">
+                                    <i class="ph ph-archive text-2xl text-purple-300 group-hover:text-purple-600 mb-1 transition-colors"></i>
+                                    <p class="text-xs font-black text-purple-500 uppercase tracking-widest">Student Papers (ZIP)</p>
+                                    <input id="bulk-file-zip" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".zip">
+                                </div>
+                                <div id="bulk-display-zip" class="hidden mt-2 p-2 bg-purple-600 rounded-xl flex items-center justify-between text-white text-xs font-bold">
+                                    <span id="bulk-name-zip" class="truncate"></span>
+                                    <button type="button" id="bulk-remove-zip"><i class="ph ph-x"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="btn-bulk-submit" onclick="submitBulkGrading()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3">
+                            <i class="ph ph-play-circle-fill text-lg"></i> Start Bulk Grading
+                        </button>
+                        <!-- Progress Board -->
+                        <div id="bulk-progress-board" class="hidden mt-6 p-6 bg-slate-900 rounded-2xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Bulk Grading Progress</p>
+                                <span id="bulk-counter" class="text-sm font-black text-white">0 / 0 graded</span>
+                            </div>
+                            <div class="h-3 bg-slate-700 rounded-full overflow-hidden mb-4">
+                                <div id="bulk-progress-bar" class="h-full bg-purple-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                            </div>
+                            <div id="bulk-job-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
+                        </div>
+                    </div>
+
+                    <!-- OCR Pre-processing Panel (hidden, shown after file upload) -->
+                    <div id="ocr-panel" class="hidden premium-card p-6 bg-white border border-orange-100 mb-8">
+                        <h3 class="text-xs font-black text-orange-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph ph-scan"></i> OCR Text Extraction Preview
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Student Sheet Image</p>
+                                <img id="ocr-image-preview" class="w-full rounded-xl border border-slate-200 object-contain max-h-56" src="" alt="Student sheet preview">
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Extracted Text (Editable)</p>
+                                    <span id="ocr-status" class="text-xs font-black text-orange-500 flex items-center gap-1"><i class="ph ph-circle-notch animate-spin"></i> Scanning...</span>
+                                </div>
+                                <textarea id="ocr-text-output" rows="8" placeholder="OCR text will appear here..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono resize-none focus:ring-2 focus:ring-orange-400"></textarea>
+                                <p class="text-xs text-slate-400 mt-1 font-medium">Correct any errors above before submitting for AI grading.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- AI Assessment Builder (Generator) -->
                     <div class="premium-card p-10 bg-white border border-blue-100/50 mb-10 overflow-hidden relative">
                          <!-- Decorative background -->
                         <div class="absolute top-0 right-0 w-64 h-64 sapphire-gradient opacity-[0.03] -mr-32 -mt-32 rounded-full"></div>
                         <div class="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 -ml-24 -mb-24 rounded-full blur-3xl"></div>
+
 
                         <div class="relative z-10">
                             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-10">
@@ -768,5 +865,6 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="features.js"></script>
 </body>
 </html>
