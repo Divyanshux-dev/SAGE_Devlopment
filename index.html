@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGE - Smart Assessment & Grading Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        academic: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        sapphire: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-academic-50 text-gray-800 font-sans antialiased overflow-x-hidden">
+
+    <div id="app">
+
+        <div id="view-login" class="min-h-screen flex items-center justify-center p-6 bg-slate-50 relative overflow-hidden fade-in">
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+            
+            <div class="max-w-md w-full premium-card overflow-hidden relative z-10 bg-white shadow-2xl">
+                <div class="academic-gradient px-10 py-14 text-center relative">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                    <i class="ph ph-graduation-cap-fill text-6xl text-blue-400 mb-4 animate-bounce"></i>
+                    <h1 class="text-4xl font-serif font-bold text-white tracking-tight">SAGE</h1>
+                    <p class="text-blue-100/80 text-sm mt-3 font-semibold uppercase tracking-widest">Academic Excellence Engine</p>
+                </div>
+                
+                <div class="p-8">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Faculty Login</h2>
+                    
+                    <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
+                        Invalid credentials. Please try again.
+                    </div>
+
+                    <form id="login-form" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="email">Institutional Email</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="ph ph-envelope-simple text-gray-400 text-lg"></i>
+                                </div>
+                                <input type="email" id="email" required placeholder="nishantjain@mitsgwalior.in" 
+                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-academic-500 focus:border-academic-500 transition-colors">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
+                                <a href="#" class="text-xs text-academic-500 hover:text-academic-700 font-medium transition-colors">Forgot Password?</a>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="ph ph-lock-key text-gray-400 text-lg"></i>
+                                </div>
+                                <input type="password" id="password" required placeholder="••••••••" 
+                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-academic-500 focus:border-academic-500 transition-colors">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full sapphire-gradient hover:shadow-xl hover:shadow-blue-500/20 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg mt-6 flex justify-center items-center gap-3 btn-premium">
+                            <span>Access Faculty Portal</span>
+                            <i class="ph ph-arrow-right-bold"></i>
+                        </button>
+                    </form>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                        <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
+                            <i class="ph ph-shield-check text-academic-500 text-sm"></i>
+                            Authorized Faculty Only
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-400">
+                Hint: Any email / password will work for this demo.
+            </div>
+        </div>
+
+        <div id="view-main" class="hidden h-screen flex overflow-hidden bg-slate-50 fade-in">
+            
+            <aside id="sidebar" class="glass-sidebar text-white w-72 flex-shrink-0 flex flex-col transition-all duration-500 ease-in-out z-20 absolute md:relative h-full -translate-x-full md:translate-x-0">
+                <div class="h-16 flex items-center px-6 border-b border-academic-700 bg-academic-900">
+                    <i class="ph ph-graduation-cap text-2xl text-blue-400 mr-2"></i>
+                    <span class="text-xl font-serif font-bold tracking-wider">SAGE</span>
+                    <button id="close-sidebar" class="md:hidden ml-auto text-gray-400 hover:text-white">
+                        <i class="ph ph-x text-xl"></i>
+                    </button>
+                </div>
+                
+              <nav class="flex-1 overflow-y-auto py-4">
+    <ul class="space-y-1 px-3">
+        <li>
+            <a href="#" onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 nav-item-active text-white border border-white/5 shadow-lg group">
+                <i class="ph ph-squares-four text-xl group-hover:scale-110 transition-transform"></i> Dashboard
+            </a>
+        </li>
+        
+        <li>
+            <a href="#" onclick="navigate('create')" id="nav-create" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group">
+                <i class="ph ph-magic-wand text-xl group-hover:rotate-12 transition-transform"></i> Grade Assessment
+            </a>
+        </li>
+        
+        <li>
+            <a href="#" onclick="navigate('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group">
+                <i class="ph ph-chart-line-up text-xl group-hover:translate-y-[-2px] transition-transform"></i> Grading Reports
+            </a>
+        </li>
+        
+        <li class="pt-4 mt-4 border-t border-academic-700">
+            <a href="#" onclick="navigate('profile')" id="nav-profile" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-academic-700 hover:text-white transition-colors">
+                <i class="ph ph-user-circle text-lg"></i> Faculty Profile
+            </a>
+        </li>
+    </ul>
+</nav>
+                
+                <div class="p-4 border-t border-academic-700">
+                    <div class="flex items-center gap-3 px-2 py-2">
+                        <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold shadow-inner">
+                            NJ
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-white truncate">Dr. Nishant Jain</p>
+                            <p class="text-xs text-gray-400 truncate">Computer Science & Engineering</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+            <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+                
+                <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 flex-shrink-0 z-10">
+                    <div class="flex items-center">
+                        <button id="open-sidebar" class="md:hidden mr-4 text-gray-500 hover:text-gray-700">
+                            <i class="ph ph-list text-2xl"></i>
+                        </button>
+                        <h2 id="page-title" class="text-lg font-semibold text-gray-800 font-serif hidden sm:block">Dashboard</h2>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <button class="text-gray-400 hover:text-academic-500 relative transition-colors">
+                            <i class="ph ph-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
+                        </button>
+                        
+                        <div class="relative">
+                            <button id="profile-menu-btn" class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-academic-500 focus:ring-offset-1">
+                                <div class="h-9 w-9 rounded-xl academic-gradient border border-white/10 flex items-center justify-center text-white shadow-lg overflow-hidden transition-transform hover:scale-105 active:scale-95">
+                                    <i class="ph ph-user-circle text-xl"></i>
+                                </div>
+                                <i class="ph ph-caret-down text-gray-400 text-xs hidden sm:block"></i>
+                            </button>
+                            
+                            <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <p class="text-sm text-gray-900 font-medium">Dr. Nishant Jain</p>
+                                    <p class="text-xs text-gray-500 truncate">nishantjain@mitsgwalior.in</p>
+                                </div>
+                                <a href="#" onclick="navigate('profile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                    <i class="ph ph-user"></i> My Profile
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                    <i class="ph ph-gear"></i> Settings
+                                </a>
+                                <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 mt-1 border-t border-gray-100">
+                                    <i class="ph ph-sign-out"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 relative">
+                    
+                    <div id="content-dashboard" class="content-section fade-in">
+                        
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
+                            <div class="space-y-1">
+                                <h1 class="text-3xl font-bold text-slate-900 tracking-tight font-professional">Welcome back, Dr. Jain</h1>
+                                <p class="text-sm font-medium text-slate-500">Overview of your academic grading ecosystem.</p>
+                            </div>
+                            <div class="flex gap-4 w-full sm:w-auto">
+                                <button onclick="navigate('create')" class="flex-1 sm:flex-none sapphire-gradient text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 btn-premium">
+                                    <i class="ph ph-plus-circle-fill text-lg"></i> New Assessment
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                            <div class="premium-card p-6 flex items-center bg-white group hover:bg-slate-50 transition-colors">
+                                <div class="bg-blue-100/50 p-4 rounded-2xl mr-5 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="ph ph-books text-3xl text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Assessments</p>
+                                    <p class="text-3xl font-bold text-slate-900 mt-1" id="total-assessments-stat">0</p>
+                                </div>
+                            </div>
+                            <div class="premium-card p-6 flex items-center bg-white group hover:bg-slate-50 transition-colors">
+                                <div class="bg-emerald-100/50 p-4 rounded-2xl mr-5 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="ph ph-users text-3xl text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Students</p>
+                                    <p class="text-3xl font-bold text-slate-900 mt-1" id="students-evaluated-stat">0</p>
+                                </div>
+                            </div>
+                            <div class="premium-card p-6 flex items-center bg-white group hover:bg-slate-50 transition-colors">
+                                <div class="bg-purple-100/50 p-4 rounded-2xl mr-5 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="ph ph-brain text-3xl text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Avg. Semantic Score</p>
+                                    <p class="text-3xl font-bold text-slate-900 mt-1" id="avg-score-stat">0%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-card overflow-hidden bg-white">
+                            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-800 font-professional">Recent Assessments</h3>
+                                    <p class="text-xs text-slate-400 font-medium">Monitoring real-time grading tasks</p>
+                                </div>
+                                <a href="#" onclick="navigate('reports')" class="text-sm text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 transition-colors">
+                                    View Repository <i class="ph ph-arrow-right font-bold"></i>
+                                </a>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-slate-100">
+                                    <thead class="bg-slate-50/50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Evaluated</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Papers</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-slate-100" id="table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-reports" class="content-section hidden fade-in max-w-5xl mx-auto w-full">
+                        <div class="mb-10">
+                            <h1 class="text-3xl font-bold text-slate-900 tracking-tight font-professional">Grading Archive</h1>
+                            <p class="text-sm font-medium text-slate-500">Search and review your full historical record.</p>
+                        </div>
+                        <div class="premium-card overflow-hidden bg-white">
+                            <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/30">
+                                <h3 class="text-lg font-bold text-slate-800 font-professional">Complete Record</h3>
+                            </div>
+                                <table class="min-w-full divide-y divide-slate-100">
+                                    <thead class="bg-slate-50/50">
+                                        <tr>
+                                            <th scope="col" class="px-8 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Course Name</th>
+                                            <th scope="col" class="px-8 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
+                                            <th scope="col" class="px-8 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                                            <th scope="col" class="px-8 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Submissions</th>
+                                            <th scope="col" class="px-8 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-8 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-slate-100" id="reports-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                            <div id="content-create" class="content-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="mb-10">
+                        <h1 class="heading-premium">Create & Grade Assessment</h1>
+                        <p class="subheading-premium">Configure your examination parameters and upload source materials.</p>
+                    </div>
+
+                    <!-- AI Assessment Builder (Generator) -->
+                    <div class="premium-card p-10 bg-white border border-blue-100/50 mb-10 overflow-hidden relative">
+                         <!-- Decorative background -->
+                        <div class="absolute top-0 right-0 w-64 h-64 sapphire-gradient opacity-[0.03] -mr-32 -mt-32 rounded-full"></div>
+                        <div class="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 -ml-24 -mb-24 rounded-full blur-3xl"></div>
+
+                        <div class="relative z-10">
+                            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-10">
+                                <div>
+                                    <h3 class="text-xs font-black text-blue-600 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                        <i class="ph ph-sparkle-fill text-lg"></i> SAGE AI Drafting Engine
+                                    </h3>
+                                    <h2 class="text-2xl font-black text-slate-900 tracking-tight font-professional">Auto-Generate Assessment</h2>
+                                    <p class="text-sm font-bold text-slate-500 mt-1">SAGE can draft professional questions and a marking rubric based on your topic.</p>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                                    <div class="flex-1 lg:w-64">
+                                        <input type="text" id="ai-topic" placeholder="e.g., Quantum Mechanics" 
+                                            class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm">
+                                    </div>
+                                    <div class="w-full sm:w-40">
+                                        <select id="ai-difficulty" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-sm h-12">
+                                            <option value="Beginner">Beginner</option>
+                                            <option value="Moderate" selected>Moderate</option>
+                                            <option value="Advanced">Advanced</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="btn-generate-ai" class="sapphire-gradient text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-3">
+                                        <i class="ph ph-magic-wand-fill text-lg"></i>
+                                        <span>Draft Assessment</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="ai-error" class="hidden mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 text-sm rounded-2xl flex items-center gap-3">
+                                <i class="ph ph-warning-circle-fill text-xl"></i>
+                                <span id="ai-error-text" class="font-bold"></span>
+                            </div>
+
+                            <div id="ai-result-container" class="hidden slide-up">
+                                <div class="p-8 bg-slate-900 rounded-3xl border border-white/10 shadow-2xl relative">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                                            <i class="ph ph-cpu-fill text-lg"></i> AI Generated Draft Repository
+                                        </p>
+                                        <button type="button" id="btn-copy-ai" class="text-xs font-black text-white/60 hover:text-white transition-colors flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl">
+                                            <i class="ph ph-copy"></i> Copy Raw Text
+                                        </button>
+                                    </div>
+                                    <textarea id="ai-generated-content" rows="8" readonly 
+                                        class="w-full bg-transparent text-blue-50/90 font-mono text-sm leading-relaxed border-none focus:ring-0 scrollbar-hide resize-none"></textarea>
+                                    <div class="mt-6 pt-6 border-t border-white/5 flex items-center gap-4 text-emerald-400">
+                                        <i class="ph ph-check-circle-fill text-2xl"></i>
+                                        <p class="text-xs font-bold leading-tight uppercase tracking-tight">Success: Draft synced to Ground Truth files below.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="create-error" class="hidden mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 text-sm rounded-2xl flex items-center gap-3 shadow-sm">
+                        <i class="ph ph-warning-circle-fill text-xl"></i>
+                        <span id="create-error-msg" class="font-bold uppercase tracking-tight">Please upload all required files to proceed.</span>
+                    </div>
+
+                    <form id="create-assessment-form" class="form-split-grid">
+                        <!-- Left Column: Primary Details -->
+                        <div class="space-y-8">
+                            <!-- Assessment Details Card -->
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="ph ph-notepad-fill text-blue-500 text-base"></i> Assessment Metadata
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="course-code">Course Identifier</label>
+                                        <div class="relative">
+                                            <i class="ph ph-book-open absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="text" id="course-code" required placeholder="e.g., CS50" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="assessment-name">Examination Title</label>
+                                        <div class="relative">
+                                            <i class="ph ph-hash-straight absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="text" id="assessment-name" required placeholder="e.g., Midterm 2024" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Identity Card -->
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="ph ph-user-focus-fill text-emerald-500 text-base"></i> Candidate Identity
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="student-name">Full Name</label>
+                                        <div class="relative">
+                                            <i class="ph ph-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="text" id="student-name" required placeholder="John Doe" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="enrollment-no">Enrollment Number</label>
+                                        <div class="relative">
+                                            <i class="ph ph-fingerprint absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="text" id="enrollment-no" required placeholder="CS250105X" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Answer Sheet (Full Width Main) -->
+                            <div class="premium-card p-8 bg-white border-2 border-dashed border-blue-100 bg-blue-50/10">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="ph ph-student-fill text-blue-600 text-base"></i> Student Submission
+                                </h3>
+                                <div id="dropzone-ss" class="relative group cursor-pointer">
+                                    <div class="flex flex-col items-center justify-center py-10 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50 group-hover:bg-white group-hover:border-blue-400 transition-all duration-300">
+                                        <div class="w-20 h-20 rounded-2xl sapphire-gradient flex items-center justify-center text-white mb-4 shadow-xl group-hover:scale-110 transition-transform">
+                                            <i class="ph ph-upload-simple text-4xl"></i>
+                                        </div>
+                                        <p class="text-lg font-bold text-slate-900 tracking-tight">Drop student paper here</p>
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Handwritten or Typed (PDF, JPG, PNG)</p>
+                                        <div class="mt-6">
+                                            <span class="px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-black shadow-sm group-hover:shadow-md transition-all">Browse Files</span>
+                                        </div>
+                                        <input id="file-ss" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    <div id="display-ss" class="hidden mt-6 p-4 bg-blue-600 rounded-2xl flex items-center justify-between text-white shadow-lg shadow-blue-500/20">
+                                        <div class="flex items-center gap-3">
+                                            <i class="ph ph-file-pdf-fill text-2xl"></i>
+                                            <span id="name-ss" class="text-sm font-bold tracking-tight truncate max-w-[240px]"></span>
+                                        </div>
+                                        <button type="button" id="remove-ss" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                                            <i class="ph ph-trash-fill text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Parameters & Reference Materials -->
+                        <div class="space-y-8">
+                            <!-- Grading Parameters Card -->
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="ph ph-chart-line-up-fill text-purple-500 text-base"></i> Assessment Parameters
+                                </h3>
+                                <div class="space-y-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="total-marks">Total Marks Potential</label>
+                                        <div class="relative">
+                                            <i class="ph ph-star-fill absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="number" id="total-marks" required min="1" placeholder="30" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider ml-1" for="total-questions">Units Count</label>
+                                        <div class="relative">
+                                            <i class="ph ph-list-numbers-fill absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                            <input type="number" id="total-questions" required min="1" placeholder="5" class="input-premium pl-11">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reference Files Card -->
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="ph ph-files-fill text-amber-500 text-base"></i> Ground Truth Files
+                                </h3>
+                                <div class="space-y-6">
+                                    <!-- Question Paper -->
+                                    <div id="dropzone-qp" class="relative group cursor-pointer">
+                                        <div class="p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50 group-hover:bg-white group-hover:border-blue-400 transition-all text-center">
+                                            <i class="ph ph-file-text-fill text-2xl text-slate-300 group-hover:text-blue-500 mb-2 transition-colors"></i>
+                                            <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Question Paper</p>
+                                            <input id="file-qp" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.doc,.docx">
+                                        </div>
+                                        <div id="display-qp" class="hidden mt-3 p-3 bg-slate-900 rounded-xl flex items-center justify-between text-white transition-all">
+                                            <span id="name-qp" class="text-[10px] font-bold truncate pr-4"></span>
+                                            <button type="button" id="remove-qp" class="text-slate-400 hover:text-white"><i class="ph ph-x-circle-fill"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Answer Key -->
+                                    <div id="dropzone-ak" class="relative group cursor-pointer">
+                                        <div class="p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50 group-hover:bg-white group-hover:border-emerald-400 transition-all text-center">
+                                            <i class="ph ph-key-fill text-2xl text-slate-300 group-hover:text-emerald-500 mb-2 transition-colors"></i>
+                                            <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Model Answer Key</p>
+                                            <input id="file-ak" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.doc,.docx">
+                                        </div>
+                                        <div id="display-ak" class="hidden mt-3 p-3 bg-slate-900 rounded-xl flex items-center justify-between text-white transition-all">
+                                            <span id="name-ak" class="text-[10px] font-bold truncate pr-4"></span>
+                                            <button type="button" id="remove-ak" class="text-slate-400 hover:text-white"><i class="ph ph-x-circle-fill"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Button -->
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                    <i class="ph ph-sparkle-fill text-lg"></i> Initiate AI Evaluation
+                                </button>
+                                <button type="button" onclick="navigate('dashboard')" class="w-full mt-4 text-slate-400 hover:text-slate-600 text-xs font-black uppercase tracking-widest transition-colors py-2">
+                                    Discard Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                    <div id="content-results" class="content-section hidden fade-in max-w-7xl mx-auto">
+                        <!-- Top bar -->
+                        <div class="mb-10 flex flex-col sm:flex-row justify-between items-end sm:items-center gap-6">
+                            <div>
+                                <h1 class="heading-premium">Grading Analysis</h1>
+                                <p class="subheading-premium" id="results-subtitle">Comprehensive AI evaluation and feedback report.</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span id="res-review-count" class="hidden px-4 py-2 bg-amber-50 border border-amber-100 text-amber-700 text-xs font-black rounded-full flex items-center gap-2 shadow-sm animate-pulse">
+                                    <i class="ph ph-warning-octagon-fill"></i>
+                                    <span id="res-review-text">NEEDS REVIEW</span>
+                                </span>
+                                <button onclick="navigate('dashboard')" class="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-black hover:bg-slate-50 hover:shadow-lg transition-all flex items-center gap-2">
+                                    <i class="ph ph-arrow-left-bold"></i> Exit to Repository
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Integrated Assessment Hero -->
+                        <div class="report-hero-grid mb-12">
+                            <!-- Left: Student Identity & Meta -->
+                            <div class="premium-card p-8 sapphire-gradient text-white flex flex-col justify-between shadow-sapphire">
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl shadow-inner border border-white/10">
+                                            <i class="ph ph-student"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Authenticated Candidate</p>
+                                            <h2 class="text-2xl font-black tracking-tight font-professional" id="res-student-name">—</h2>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 gap-4 pt-6 border-t border-white/10">
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1.5">Enrollment Number</p>
+                                            <p class="text-sm font-bold tracking-wider font-mono opacity-90" id="res-enrollment-no">—</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1.5">Course Context</p>
+                                            <p class="text-sm font-bold opacity-90" id="res-course-code">—</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1.5">Assessment Unit</p>
+                                            <p class="text-sm font-bold opacity-90" id="res-assessment-name">—</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pt-8 mt-8 border-t border-white/10">
+                                    <div class="flex items-center gap-2 text-blue-400">
+                                        <i class="ph ph-shield-check-fill text-xl"></i>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">SAGE Verified Evaluation</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Scoreboard & Summary -->
+                            <div class="premium-card p-8 bg-white flex flex-col justify-center">
+                                <div class="flex flex-col lg:flex-row gap-10 items-center">
+                                    <div class="flex-1 space-y-6 w-full">
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <i class="ph ph-read-cv-logo-fill text-blue-500"></i> Pedagogical Executive Summary
+                                            </p>
+                                            <div class="p-5 bg-slate-50 border border-slate-100 rounded-3xl">
+                                                <p class="text-sm text-slate-700 leading-relaxed font-semibold italic" id="res-feedback"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-end">
+                                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery Progress</p>
+                                                <span class="text-lg font-black text-slate-900" id="res-percentage"></span>
+                                            </div>
+                                            <div class="h-4 w-full bg-slate-100 rounded-full overflow-hidden p-1 shadow-inner">
+                                                <div id="res-progress-bar" class="h-full rounded-full sapphire-gradient transition-all duration-1000 shadow-sm" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex shrink-0 gap-8 items-center border-l border-slate-100 pl-8 h-full hidden lg:flex">
+                                        <div class="text-center">
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Score</p>
+                                            <div class="relative inline-flex items-center justify-center">
+                                                <svg class="w-32 h-32 transform -rotate-90">
+                                                    <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-100" />
+                                                    <circle id="res-score-circle" cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="364.4" stroke-dashoffset="364.4" class="text-blue-600 transition-all duration-1000" />
+                                                </svg>
+                                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                                    <span id="res-score" class="text-4xl font-black text-slate-900 leading-none"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Letter Grade</p>
+                                            <div class="w-24 h-24 rounded-full sapphire-gradient flex items-center justify-center text-white text-5xl font-black shadow-xl ring-4 ring-blue-500/10">
+                                                <span id="res-grade-label">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question Breakdown Header -->
+                        <div class="mb-8 flex items-center justify-between border-b border-slate-100 pb-4">
+                            <h4 class="text-lg font-black text-slate-900 font-professional tracking-tight flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg sapphire-gradient flex items-center justify-center text-white shadow-lg">
+                                    <i class="ph ph-stack-fill text-sm"></i>
+                                </span>
+                                Unit-wise Performance Analysis
+                            </h4>
+                            <div class="flex gap-2">
+                                <button class="p-2 text-slate-400 hover:text-blue-500 transition-colors"><i class="ph ph-printer-fill text-xl"></i></button>
+                                <button class="p-2 text-slate-400 hover:text-blue-500 transition-colors"><i class="ph ph-share-network-fill text-xl"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div id="results-breakdown" class="space-y-6">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div id="content-profile" class="content-section hidden fade-in max-w-7xl mx-auto">
+                        <div class="mb-10">
+                            <h1 class="heading-premium">Faculty Portfolio</h1>
+                            <p class="subheading-premium">Manage your professional credentials and secure portal access.</p>
+                        </div>
+
+                        <div class="premium-card overflow-hidden bg-white mb-10">
+                            <div class="h-48 sapphire-gradient relative overflow-hidden">
+                                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                                <div class="absolute top-6 right-8">
+                                    <span class="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-[10px] font-black text-white uppercase tracking-widest">Digital ID: SECURE-992-001</span>
+                                </div>
+                            </div>
+                            
+                            <div class="px-12 pb-12 relative">
+                                <div class="absolute -top-20 left-12 h-44 w-44 rounded-3xl border-8 border-white academic-gradient shadow-2xl flex items-center justify-center text-white text-7xl overflow-hidden ring-8 ring-blue-500/5 transition-transform hover:scale-105 active:scale-95 cursor-pointer">
+                                    <i class="ph ph-user-circle-fill"></i>
+                                </div>
+                                
+                                <div class="pt-28 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                                    <div>
+                                        <h2 class="text-4xl font-black text-slate-900 font-professional tracking-tight">Dr. Nishant Jain</h2>
+                                        <div class="flex items-center gap-4 mt-3">
+                                            <p class="text-emerald-600 font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">
+                                                <i class="ph ph-shield-check-fill text-xs"></i> Verified Professor
+                                            </p>
+                                            <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5">
+                                                <i class="ph ph-chalkboard-teacher text-lg"></i> Senior Faculty Associate
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-4 w-full sm:w-auto">
+                                        <button class="flex-1 sm:flex-none bg-white border border-slate-200 text-slate-700 px-8 py-3.5 rounded-2xl text-sm font-black hover:bg-slate-50 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                                            <i class="ph ph-pencil-simple-fill"></i> Update Identity
+                                        </button>
+                                        <button class="flex-1 sm:flex-none sapphire-gradient text-white px-8 py-3.5 rounded-2xl text-sm font-black shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
+                                            Download Credentials
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 border-t border-slate-50 pt-16">
+                                    <div class="space-y-10">
+                                        <div>
+                                            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                                <i class="ph ph-identification-card-fill text-blue-500 text-base"></i> Academic Identity Matrix
+                                            </h3>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                                <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Primary Institution</p>
+                                                    <p class="text-sm font-bold text-slate-700 leading-tight">Madhav Institute of Technology & Science, Gwalior</p>
+                                                </div>
+                                                <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Faculty Serial ID</p>
+                                                    <p class="text-sm font-bold text-slate-700">FAC-MITS-CSE-NJ-2024</p>
+                                                </div>
+                                                <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Professional Email</p>
+                                                    <p class="text-sm font-bold text-blue-600">nishantjain@mitsgwalior.in</p>
+                                                </div>
+                                                <div class="space-y-1.5 p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
+                                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Core Specialization</p>
+                                                    <p class="text-sm font-bold text-slate-700">Theoretical Computer Science</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-10">
+                                        <div>
+                                            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                                <i class="ph ph-shield-star-fill text-amber-500 text-base"></i> Security & Access Protocols
+                                            </h3>
+                                            
+                                            <div class="bg-slate-900 rounded-3xl p-8 border border-white/5 relative overflow-hidden shadow-2xl">
+                                                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                                                
+                                                <div class="space-y-6 relative">
+                                                    <div class="flex items-center justify-between pb-6 border-b border-white/5">
+                                                        <div>
+                                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Session Integrity</p>
+                                                            <span class="text-sm font-bold text-emerald-400">AUTHORIZED ACCESS</span>
+                                                        </div>
+                                                        <i class="ph ph-lock-key-fill text-slate-700 text-3xl"></i>
+                                                    </div>
+                                                    
+                                                    <div class="flex items-center justify-between pb-6 border-b border-white/5">
+                                                        <div>
+                                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Last Cryptographic Sync</p>
+                                                            <span class="text-sm font-bold text-white uppercase tracking-widest" id="last-login-date">Today, 06:48 AM</span>
+                                                        </div>
+                                                        <i class="ph ph-clock-fill text-slate-700 text-2xl"></i>
+                                                    </div>
+                                                    
+                                                    <button onclick="logout()" class="group w-full bg-rose-500 hover:bg-rose-600 text-white font-black px-6 py-4 rounded-2xl text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20 active:scale-95 mt-4">
+                                                        <i class="ph ph-sign-out-bold text-xl transition-transform group-hover:translate-x-1"></i> Terminate Session
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

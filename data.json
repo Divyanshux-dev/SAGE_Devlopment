@@ -1,0 +1,479 @@
+[
+  {
+    "id": "UHIA",
+    "name": "Deelnlsp Learning Assessment",
+    "studentName": "lksa",
+    "enrollmentNo": "lkjas",
+    "courseCode": "uhia",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 12,
+      "maxTotalScore": 20,
+      "percentage": 60,
+      "overallFeedback": "You've shown a good grasp of Object-Oriented Programming and Python data structures, but there's a clear area for improvement in your understanding of React hooks. Keep practicing!",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 4.5,
+          "conceptAnalysis": "The model answer defines Polymorphism as 'many forms,' allowing objects of different classes to be treated as common base class objects, enabling a single interface for different underlying forms (like method overriding) (3 marks). The analogy should illustrate this, e.g., a person being a teacher, father, and musician (2 marks).",
+          "studentLogic": "The student correctly states 'Polymorphism comes from Greek meaning many forms' and describes it as a function/operator doing different things based on the object. This covers the core concept well, though it doesn't explicitly mention 'common base class' or 'method overriding.' The analogy of a smartphone acting as a camera, phone, or gaming console is excellent and clearly demonstrates the concept.",
+          "feedback": "You've articulated the core concept of polymorphism well and provided a very fitting real-world analogy. To improve further, consider adding details about how polymorphism enables treating objects of different classes through a common interface.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 10,
+          "marksAwarded": 7.5,
+          "conceptAnalysis": "The primary difference (5 marks) is that Python lists can hold heterogeneous data (mixed types), while NumPy arrays hold homogeneous data (strictly one type). NumPy is preferred for massive datasets (5 marks) because its arrays are stored in contiguous memory blocks, leading to faster and more memory-efficient mathematical operations.",
+          "studentLogic": "The student correctly identifies the difference: Python lists store different types, while NumPy arrays store exact same types. For the performance reason, the student notes that NumPy calculates things 'way faster than standard python' for big data. However, they missed the crucial underlying reason of 'contiguous memory blocks' as specified in the model answer and the explicit instruction in the user note.",
+          "feedback": "You correctly identified the key difference between Python lists and NumPy arrays regarding data homogeneity. Your explanation for NumPy's preference for massive datasets is partially correct; while it's faster, it's essential to also mention that this efficiency stems from its contiguous memory storage.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The primary purpose of `useEffect` (3 marks) is to perform side effects in functional components, syncing the component with external systems *after it renders*. Common use cases (2 marks) include fetching data from an API, setting up subscriptions, or directly manipulating the DOM.",
+          "studentLogic": "The student incorrectly describes `useEffect` as being used to 'store variables that will change the state of the application' and making sure the 'UI updates when a user interacts with it.' This description accurately reflects the purpose and use case of the `useState` hook, not `useEffect`. The provided use case of incrementing a shopping cart counter on click is also a classic `useState` example. The user note explicitly states to award 0/5 for this complete confusion with `useState`.",
+          "feedback": "Your explanation and use case describe the `useState` hook, which is used for managing component state. The `useEffect` hook, however, is specifically for handling 'side effects' such as data fetching, subscriptions, or manual DOM manipulation after the component renders.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "SID",
+    "name": ";lw",
+    "studentName": "lk w",
+    "enrollmentNo": "lw",
+    "courseCode": "sid",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "yellow",
+    "result": {
+      "totalScore": 7,
+      "maxTotalScore": 20,
+      "percentage": 35,
+      "overallFeedback": "Your understanding of Polymorphism is good, but you need to revisit the concepts of NumPy array memory and React hooks for better clarity.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 5,
+          "conceptAnalysis": "The model answer expects an explanation of polymorphism as 'many forms,' enabling objects of different classes to be treated as a common base via a single interface (e.g., method overriding), and a real-world analogy. The concept is worth 3 marks and the analogy 2 marks.",
+          "studentLogic": "The student correctly defines polymorphism as 'many forms' and explains its coding implication (function/operator doing different things based on object). The analogy of a smartphone acting as different devices (camera, phone, game console) depending on the app is a good, relevant real-world example of exhibiting different behaviors from a single entity.",
+          "feedback": "Excellent explanation of Polymorphism with a clear and relevant real-world analogy.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 10,
+          "marksAwarded": 2,
+          "conceptAnalysis": "The model answer requires two main parts: 1. The primary difference between Python List and NumPy Array (5 marks), specifying that Python lists are heterogeneous and NumPy arrays are homogeneous. 2. Why NumPy is preferred for massive datasets (5 marks), specifically mentioning contiguous memory storage, faster mathematical operations, and memory efficiency.",
+          "studentLogic": "The student correctly identifies that Python lists store different types and NumPy arrays store homogeneous types, although stating 'only stores numbers' is a slight oversimplification (it's homogeneous type, not strictly numbers). For the preference reason, the student states NumPy is 'faster' for big data but explicitly misses the crucial 'contiguous memory' explanation as noted in the student's own comment. Following the student's instruction to dock points for missing this specific detail, the performance reason is largely incomplete.",
+          "feedback": "You correctly identified the type homogeneity difference. However, your explanation for NumPy's preference in massive datasets was incomplete, missing the key concept of contiguous memory storage for performance benefits.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The model answer defines useEffect's purpose (3 marks) as allowing side effects in functional components, syncing with external systems after render, and provides common use cases (2 marks) like data fetching, subscriptions, or DOM manipulation.",
+          "studentLogic": "The student describes the useEffect hook as being 'primarily used to store variables that will change the state of the application' and making sure 'the UI updates when a user interacts with it.' The example provided, 'shopping cart counter go up by 1 every time a user clicks the Add to Cart button,' directly corresponds to state management, not side effects. As per the student's own note, this description is entirely focused on `useState` rather than `useEffect`.",
+          "feedback": "Your answer describes the `useState` hook for managing component state, not the `useEffect` hook for handling side effects. Please review the distinction between these React hooks.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "NLSD",
+    "name": "lknsdf",
+    "studentName": "lnwf;",
+    "enrollmentNo": "mlef",
+    "courseCode": "nlsd",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 12,
+      "maxTotalScore": 20,
+      "percentage": 60,
+      "overallFeedback": "You demonstrated a good understanding of some key concepts, and your self-reflection is commendable, indicating a strong potential for improvement.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 5,
+          "conceptAnalysis": "The concept of Polymorphism means \"many forms\" in OOP, allowing objects of different classes to be treated through a common interface, typically involving method overriding. An ideal answer provides a clear definition and a relevant real-world analogy. (Concept: 3 marks, Analogy: 2 marks)",
+          "studentLogic": "The student correctly states \"Polymorphism comes from Greek meaning many forms.\" and explains it as a function/operator doing \"different things depending on the object it's interacting with,\" which captures the essence of polymorphic behavior. The analogy of a smartphone acting as a camera, phone, or gaming console depending on the app is an excellent real-world example demonstrating different behaviors from a single entity, aligning well with the model answer's intent.",
+          "feedback": "Excellent explanation of polymorphism and a very fitting real-world analogy.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 2,
+          "maxMarks": 10,
+          "marksAwarded": 7,
+          "conceptAnalysis": "The key differences are that Python lists can hold heterogeneous data types, while NumPy arrays are homogeneous. NumPy arrays are preferred for massive datasets due to contiguous memory storage, leading to faster and more memory-efficient mathematical operations. (Difference: 5 marks, Performance Reason: 5 marks)",
+          "studentLogic": "The student correctly identifies the difference in data types: Python lists store \"different types of things together,\" and NumPy arrays store \"numbers of the exact same type\" (homogeneous vs. heterogeneous). For the preference reason, the student states NumPy is faster for big data but explicitly notes (in a self-correction) that they \"missed the specific 'contiguous memory' explanation.\" This shows an understanding of what NumPy achieves (speed) but not the fundamental how (contiguous memory) which is crucial for full marks on the performance reason.",
+          "feedback": "You clearly distinguished between Python lists and NumPy arrays regarding data types. You understood NumPy's performance advantage, but remember to specify that this is due to contiguous memory allocation for a complete answer.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 3,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The useEffect hook in React is used to perform \"side effects\" (e.g., data fetching, subscriptions, manual DOM manipulation) after a component renders, syncing the component with external systems. It is distinct from useState, which manages component-local state. (Purpose: 3 marks, Use Case: 2 marks)",
+          "studentLogic": "The student describes useEffect as being \"primarily used to store variables that will change the state of the application\" and for \"UI updates when a user interacts with it,\" providing a use case of a \"shopping cart counter go up by 1 every time a user clicks the 'Add to Cart' button.\" As the student correctly noted in their self-correction, this description completely aligns with the functionality of useState and typical event handling, not useEffect. useEffect is for side effects, not direct state management of user interactions in this manner.",
+          "feedback": "The description and use case provided are more characteristic of the useState hook and direct event handling rather than useEffect, which is designed for side effects in functional components.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "CS50",
+    "name": "midterm",
+    "studentName": "divyanshu",
+    "enrollmentNo": "btcs25o1057",
+    "courseCode": "cs50",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 11,
+      "maxTotalScore": 20,
+      "percentage": 55,
+      "overallFeedback": "The student has a good grasp of OOP concepts and Python list/NumPy differences, but needs to significantly improve understanding of React's useEffect hook.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 4,
+          "conceptAnalysis": "The model answer requires an explanation of polymorphism as 'many forms,' allowing objects of different classes to be treated as objects of a common base class via a single interface (e.g., method overriding), and a relevant real-world analogy.",
+          "studentLogic": "The student correctly defines polymorphism as 'many forms' and explains it as a function/operator doing different things based on the object, which aligns with the core concept. The analogy of a smartphone acting as a camera, phone, or gaming console based on the app opened is an excellent illustration of polymorphic behavior.",
+          "feedback": "Good explanation of polymorphism and an excellent, clear analogy. To improve, explicitly mention how different classes can share a common interface or base class.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 2,
+          "maxMarks": 10,
+          "marksAwarded": 7,
+          "conceptAnalysis": "The model answer expects the primary difference: Python lists are heterogeneous, while NumPy arrays are homogeneous. For the preference for massive datasets, it requires the explanation of contiguous memory blocks leading to faster, more memory-efficient mathematical operations.",
+          "studentLogic": "The student correctly identifies the difference: Python lists store 'different types of things' (heterogeneous) and NumPy arrays store 'numbers of the exact same type' (homogeneous). For NumPy's preference, the student notes it 'calculates things way faster,' which is true, but misses the crucial detail about 'contiguous memory' storage, as highlighted in their own note.",
+          "feedback": "Excellent explanation of the difference between Python lists and NumPy arrays. However, for why NumPy is preferred for massive datasets, you missed the key technical reason about contiguous memory storage, which enables faster and more memory-efficient operations.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 3,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The model answer defines `useEffect`'s purpose as performing side effects in functional components, syncing with external systems after render, and provides use cases like data fetching, subscriptions, or DOM manipulation.",
+          "studentLogic": "The student's description of `useEffect`'s purpose ('to store variables that will change the state of the application,' 'UI updates when a user interacts with it') incorrectly describes the `useState` hook or general state management, not `useEffect`. The provided use case of a 'shopping cart counter' increasing on a click is also a clear `useState` application, not a side effect for `useEffect`. The student's self-assessment confirms this fundamental misunderstanding.",
+          "feedback": "Your explanation and use case describe the `useState` hook for managing component state and direct user interactions, not `useEffect`. The `useEffect` hook is specifically for handling side effects like data fetching, subscriptions, or manually manipulating the DOM, which happen after a component renders or when dependencies change.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "CS50",
+    "name": "midterm",
+    "studentName": "divyanshu",
+    "enrollmentNo": "btcs25o1057",
+    "courseCode": "cs50",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 12,
+      "maxTotalScore": 20,
+      "percentage": 60,
+      "overallFeedback": "Your understanding of Object-Oriented Programming and Python data structures is commendable, but please review the React hooks, especially the distinction between useState and useEffect.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 5,
+          "conceptAnalysis": "The model answer expects an explanation of polymorphism as 'many forms,' allowing objects of different classes to be treated as a common base, and a real-world analogy. Key aspects include a single interface representing different underlying forms (like method overriding).",
+          "studentLogic": "The student correctly defines polymorphism as 'many forms' and explains that a function/operator can behave differently based on the object. The smartphone analogy is excellent, showing one device (object) exhibiting different behaviors (forms) based on the app (context/method).",
+          "feedback": "Excellent explanation of Polymorphism with a very fitting real-world analogy.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy."
+        },
+        {
+          "questionNumber": 2,
+          "maxMarks": 10,
+          "marksAwarded": 7,
+          "conceptAnalysis": "The model answer requires explaining the difference: Python lists hold heterogeneous data, while NumPy arrays hold homogeneous data (5 marks). For why NumPy is preferred for massive datasets, it requires mentioning contiguous memory blocks, faster mathematical operations, and memory efficiency (5 marks).",
+          "studentLogic": "The student correctly identifies the primary difference regarding heterogeneous (Python list) vs. homogeneous (NumPy array) data types, earning full marks for this part. For the preference of NumPy, the student correctly states it 'calculates things way faster,' but misses the crucial underlying reason of 'contiguous memory' and 'memory efficiency' as per the model answer and the student's self-correction note. Thus, points are docked for the incomplete explanation of performance.",
+          "feedback": "Good job explaining the data type differences between Python lists and NumPy arrays. However, while you correctly noted NumPy's speed advantage, a more complete explanation for its efficiency with massive datasets would have included the concept of contiguous memory storage.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets?"
+        },
+        {
+          "questionNumber": 3,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The model answer defines `useEffect`'s purpose as performing side effects in functional components, syncing with external systems *after* rendering (3 marks). Common use cases include fetching data from an API, setting up subscriptions, or manipulating the DOM (2 marks).",
+          "studentLogic": "The student incorrectly describes `useEffect` as being used 'to store variables that will change the state of the application' and 'makes sure the UI updates when a user interacts with it,' which clearly aligns with the purpose of `useState`. The provided use case of incrementing a shopping cart counter on a click is a direct example of `useState`, not `useEffect`. As per the student's explicit instruction, 0 marks are awarded for completely describing `useState` instead of `useEffect`.",
+          "feedback": "Your answer describes the `useState` hook rather than `useEffect`. The `useEffect` hook is primarily for managing side effects, like data fetching or subscriptions, that occur after the component renders.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Describe the primary purpose of the useEffect hook in React and provide one common use case."
+        }
+      ]
+    }
+  },
+  {
+    "id": "JHSD",
+    "name": "lknwef",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 12,
+      "maxTotalScore": 20,
+      "percentage": 60,
+      "overallFeedback": "You demonstrate a strong understanding of polymorphism and data structure differences, but there is a clear area for improvement in understanding React hooks.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 5,
+          "conceptAnalysis": "The ideal answer should define polymorphism as 'many forms,' allowing objects of different classes to be treated as objects of a common base class, using a single interface (e.g., method overriding). The analogy should effectively illustrate different behaviors based on context.",
+          "studentLogic": "The student correctly defined polymorphism as 'many forms' and explained its application in code (function/operator doing different things depending on the object). The analogy of a smartphone acting as a camera, phone, or gaming console based on the app is relevant and clearly illustrates the concept.",
+          "feedback": "Excellent explanation of polymorphism with a clear and relevant real-world analogy.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 2,
+          "maxMarks": 10,
+          "marksAwarded": 7,
+          "conceptAnalysis": "The primary difference is that Python lists hold heterogeneous data, while NumPy arrays hold homogeneous data. NumPy is preferred for massive datasets due to contiguous memory storage, leading to faster mathematical operations and better memory efficiency.",
+          "studentLogic": "The student correctly identified the difference between Python lists (different types) and NumPy arrays (same exact type). For the preference reason, the student stated NumPy is faster for big data but missed the crucial explanation of 'contiguous memory' storage, as noted in the student's own comment.",
+          "feedback": "Good explanation of the data type differences between Python lists and NumPy arrays. To improve, remember to explain *why* NumPy is faster, specifically mentioning its use of contiguous memory for efficient operations.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 3,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The `useEffect` hook is primarily for performing 'side effects' in functional components, such as syncing with external systems, fetching data, subscriptions, or direct DOM manipulation, after the component renders. It is not for storing variables that change state directly.",
+          "studentLogic": "The student's explanation and use case completely describe the `useState` hook, which is used for managing component-specific state, rather than the `useEffect` hook. The purpose described ('store variables that will change the state of the application') and the example ('shopping cart counter go up by 1') are characteristic of `useState` functionality.",
+          "feedback": "Your explanation and example describe the `useState` hook for managing component state. The `useEffect` hook is distinct and used for handling side effects like data fetching or subscriptions after rendering.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Q1. Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "CS101",
+    "name": "midterm",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 11,
+      "maxTotalScore": 20,
+      "percentage": 55,
+      "overallFeedback": "You have a good grasp of some core concepts, but ensure you differentiate between similar-sounding hooks and provide specific technical explanations for performance advantages.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 4,
+          "conceptAnalysis": "The ideal answer for Polymorphism requires defining it as 'many forms' in OOP, allowing objects of different classes to be treated as a common base class through a single interface, often involving method overriding. A real-world analogy should illustrate this concept clearly.",
+          "studentLogic": "The student correctly defines polymorphism as 'many forms' and explains its manifestation in code as functions/operators doing different things based on the interacting object. The analogy of a smartphone acting as a camera, phone, or gaming console based on the app is relevant and effectively illustrates different behaviors from a single entity.",
+          "feedback": "Good explanation of polymorphism and a very relevant real-world analogy. To improve, explicitly mention the concept of a common base class or interface.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Explain the concept of Polymorphism in Object-Oriented Programming and provide a real-world analogy. (Total: 5 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 10,
+          "marksAwarded": 7,
+          "conceptAnalysis": "The primary difference between Python List and NumPy Array is data homogeneity (Lists are heterogeneous, Arrays are homogeneous). NumPy's preference for massive datasets stems from its use of contiguous memory blocks, leading to faster and more memory-efficient mathematical operations.",
+          "studentLogic": "The student correctly identifies the difference in data types (heterogeneous for lists, homogeneous for NumPy arrays). For the preference reason, the student states that NumPy calculates things 'way faster' but misses the critical technical explanation of 'contiguous memory blocks' and specific mathematical operation efficiency. The student's self-note acknowledges this omission.",
+          "feedback": "You clearly explained the difference between Python lists and NumPy arrays regarding data types. However, for NumPy's performance advantage, you need to explain the underlying reason, specifically mentioning contiguous memory allocation.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "What is the primary difference between a standard Python List and a NumPy Array? Why is NumPy preferred for massive datasets? (Total: 10 marks)"
+        },
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 0,
+          "conceptAnalysis": "The useEffect hook in React is for performing side effects (e.g., data fetching, subscriptions, DOM manipulation) after a component renders, syncing it with external systems. A common use case is fetching data from an API.",
+          "studentLogic": "The student describes the purpose of the useEffect hook as storing variables that change application state and updating the UI based on user interaction. The example of a shopping cart counter going up on click perfectly describes the useState hook, not useEffect. The student's self-note correctly identifies this confusion.",
+          "feedback": "Your answer describes the functionality of the 'useState' hook, not 'useEffect'. Please review the primary purpose of 'useEffect' which is to handle side effects in functional components.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Describe the primary purpose of the useEffect hook in React and provide one common use case. (Total: 5 marks)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "CS101",
+    "name": "Python Midterm Test",
+    "date": "30 Mar 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "green",
+    "result": {
+      "totalScore": 13,
+      "maxTotalScore": 15,
+      "percentage": 86.67,
+      "overallFeedback": "A good understanding of the core concepts is demonstrated; focus on providing more comprehensive details in your answers for full marks.",
+      "questionResults": [
+        {
+          "questionNumber": 1,
+          "maxMarks": 5,
+          "marksAwarded": 4,
+          "conceptAnalysis": "The ideal answer for polymorphism in OOP should define it as allowing objects of different classes to be treated as a single type, and mention key enablers like method overriding or duck typing.",
+          "studentLogic": "The student defines polymorphism as 'many forms' and explains that a 'function can work differently based on the object it is called on.' This accurately captures the essence of polymorphism, particularly method overriding. However, it doesn't explicitly mention 'duck typing' or the treatment of objects as a single type as comprehensively as the model answer.",
+          "feedback": "Good explanation of the core concept of polymorphism and how functions behave differently based on objects.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "What is polymorphism in OOP?"
+        },
+        {
+          "questionNumber": 2,
+          "maxMarks": 5,
+          "marksAwarded": 4,
+          "conceptAnalysis": "The ideal answer should highlight two main differences: mutability (lists are mutable, tuples are immutable) and syntax (lists use [], tuples use ()).",
+          "studentLogic": "The student correctly identifies the key difference regarding mutability: 'Lists can be changed after creation but tuples cannot.' They also correctly state the syntax for lists: 'Lists use square brackets.' However, the answer omits the specific syntax for tuples.",
+          "feedback": "Correctly identified the primary difference of mutability and the syntax for lists. Remember to include the syntax for tuples as well.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "Explain the difference between a list and a tuple in Python."
+        },
+        {
+          "questionNumber": 3,
+          "maxMarks": 5,
+          "marksAwarded": 5,
+          "conceptAnalysis": "The ideal answer should define a decorator as a function that wraps another function, modifying its behavior, and mention its usage with the '@' syntax.",
+          "studentLogic": "The student's answer, 'Decorators add extra functionality to a function without changing its code, using the @ symbol,' perfectly captures the definition and the syntax. 'Adding extra functionality without changing its code' is an excellent semantic equivalent to 'wraps another function, modifying its behavior'.",
+          "feedback": "Excellent and concise definition of a decorator, including its purpose and syntax.",
+          "confidence": "HIGH",
+          "needsReview": false,
+          "questionText": "What is a decorator in Python?"
+        }
+      ]
+    }
+  },
+  {
+    "id": "CS101",
+    "name": "Python Midterm Test",
+    "date": "Mar 30, 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "green",
+    "result": {
+      "totalScore": 13,
+      "percentage": 86.67,
+      "questionResults": [
+        {
+          "conceptAnalysis": "Polymorphism in OOP allows objects of different classes to be treated as instances of a common type, enabling a single interface for different underlying data types. Key aspects include method overriding (runtime polymorphism) and duck typing.",
+          "studentLogic": "The student correctly translates 'polymorphism' to 'many forms' and describes its effect: 'A function can work differently based on the object it is called on.' This addresses the concept of method overriding and varied behavior across objects, which is a core aspect of polymorphism. While it doesn't explicitly mention 'objects of different classes treated as a single type' or 'duck typing,' it captures the essence of the behavioral aspect.",
+          "marksAwarded": 4,
+          "needsReview": false,
+          "feedback": "Good definition and explanation of how polymorphism manifests through different function behaviors on various objects. To achieve full marks, also consider mentioning that it allows objects of different classes to be treated as a common type, and concepts like duck typing."
+        },
+        {
+          "conceptAnalysis": "The fundamental differences between Python lists and tuples are mutability (lists are mutable, tuples are immutable) and their respective syntax (lists use square brackets [], tuples use parentheses ()).",
+          "studentLogic": "The student correctly identifies the key difference regarding mutability: 'Lists can be changed after creation but tuples cannot.' They also correctly state the syntax for lists: 'Lists use square brackets.' However, the student omits the syntax for tuples.",
+          "marksAwarded": 4,
+          "needsReview": false,
+          "feedback": "Excellent explanation of the mutability difference, which is the most crucial distinction. You also correctly identified the syntax for lists. To improve, remember to also state the syntax for tuples."
+        },
+        {
+          "conceptAnalysis": "A Python decorator is a higher-order function that takes another function as an argument, extends or modifies its behavior without explicitly changing its source code, and returns the modified function. It's typically applied using the '@' symbol above the function definition.",
+          "studentLogic": "The student accurately describes the purpose and mechanism: 'Decorators add extra functionality to a function without changing its code, using the @ symbol.' This implicitly covers the concept of wrapping and modifying behavior while explicitly stating the non-invasive nature and the correct syntax. The phrase 'add extra functionality... without changing its code' semantically implies the 'wraps another function, modifying its behaviour' part.",
+          "marksAwarded": 5,
+          "needsReview": false,
+          "feedback": "Comprehensive and accurate answer. You clearly articulated the core function of decorators and their syntax."
+        }
+      ]
+    }
+  },
+  {
+    "id": "cs 101",
+    "name": "project",
+    "date": "Mar 30, 2026",
+    "papers": 1,
+    "status": "Graded",
+    "color": "blue",
+    "result": {
+      "totalScore": 10,
+      "percentage": 50,
+      "questionResults": [
+        {
+          "conceptAnalysis": "The concept of Polymorphism in Object-Oriented Programming centers on allowing objects of different classes to be treated as objects of a common base class, facilitating a single interface to represent diverse underlying forms, typically through method overriding. The term literally means 'many forms'. The analogy should exemplify this 'many forms' principle, where one entity behaves differently based on context.",
+          "studentLogic": "The student correctly identifies that Polymorphism means 'many forms' from Greek. Their explanation states that a 'function or operator can do different things depending on the object it's interacting with.' While partially accurate in implying varied behavior, it lacks the crucial details of OOP such as common base classes, interfaces, or method overriding, which are fundamental to the concept. The analogy of a smartphone acting as a camera, phone, or gaming console depending on the app is a good illustration of different behaviors from a single entity.",
+          "marksAwarded": 3.5,
+          "needsReview": false,
+          "feedback": "Your definition of polymorphism correctly identifies its etymological meaning. However, your explanation of its application in code is superficial. It lacks the specificity regarding how polymorphism enables objects of different classes to be treated as a common type through shared interfaces or base classes, which is central to the concept in OOP. The analogy provided is clear and effectively illustrates the 'many forms' aspect, demonstrating a good grasp of that particular facet."
+        },
+        {
+          "conceptAnalysis": "The primary difference between a Python List and a NumPy Array lies in their data homogeneity: Lists can store heterogeneous data types, whereas NumPy Arrays are strictly homogeneous. NumPy's preference for massive datasets stems from its underlying implementation, specifically its storage of elements in contiguous memory blocks, which allows for significantly faster and more memory-efficient mathematical operations and vectorized computations.",
+          "studentLogic": "The student accurately identifies the core difference: Python lists handle heterogeneous data, while NumPy arrays require homogeneous data of a single type. For the performance reason, the student states that NumPy is preferred for big data because it 'calculates things way faster than standard python.' This statement is correct in its outcome but fails to explain the underlying mechanism. The critical explanation of 'contiguous memory' and its implications for performance (e.g., cache efficiency, vectorized operations) is entirely omitted, as the student's self-note explicitly confirms.",
+          "marksAwarded": 6.5,
+          "needsReview": false,
+          "feedback": "You correctly identified the key difference between Python lists and NumPy arrays regarding data homogeneity. Your statement that NumPy processes data faster for large datasets is also correct. However, your explanation for *why* it is faster is insufficient. You did not explain the critical architectural advantage of NumPy arrays being stored in contiguous memory blocks, which is the primary reason for their performance superiority in mathematical operations and memory efficiency. This omission signifies a gap in understanding the fundamental engineering principles behind NumPy's performance."
+        },
+        {
+          "conceptAnalysis": "The primary purpose of the `useEffect` hook in React is to allow functional components to perform 'side effects' after rendering. These side effects involve interactions with the world outside the component's render logic, such as data fetching from an API, setting up subscriptions, manually manipulating the DOM, or logging. It ensures synchronization between the component and external systems. A common use case would be fetching data when a component mounts or when certain dependencies change.",
+          "studentLogic": "The student describes `useEffect` as being 'primarily used to store variables that will change the state of the application' and 'makes sure the UI updates when a user interacts with it.' This description is fundamentally incorrect; it accurately describes the purpose and behavior of the `useState` hook, not `useEffect`. The provided use case, 'make a shopping cart counter go up by 1 every time a user clicks the 'Add to Cart' button,' is a classic example of state management using `useState`, not a side effect managed by `useEffect`. The student's self-correction note acknowledges this severe conceptual error.",
+          "marksAwarded": 0,
+          "needsReview": false,
+          "feedback": "Your explanation and use case describe the functionality of the `useState` hook, which is used for managing component state and triggering UI updates. This is a complete misinterpretation of the `useEffect` hook's purpose. `useEffect` is specifically designed for handling 'side effects'—operations that interact with the outside world (like data fetching, subscriptions, manual DOM manipulation)—after a component renders. The scenario you provided is a direct application of state management, not a side effect."
+        }
+      ]
+    }
+  }
+]
