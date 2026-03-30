@@ -6,6 +6,7 @@
     <title>SAGE - Smart Assessment & Grading Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
@@ -140,6 +141,12 @@
         <li>
             <a href="#" onclick="navigate('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group">
                 <i class="ph ph-chart-line-up text-xl group-hover:translate-y-[-2px] transition-transform"></i> Grading Reports
+            </a>
+        </li>
+
+        <li>
+            <a href="#" onclick="navigate('analytics')" id="nav-analytics" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group">
+                <i class="ph ph-chart-pie-slice text-xl group-hover:scale-110 transition-transform"></i> Analytics
             </a>
         </li>
         
@@ -644,7 +651,9 @@
                                 Unit-wise Performance Analysis
                             </h4>
                             <div class="flex gap-2">
-                                <button class="p-2 text-slate-400 hover:text-blue-500 transition-colors"><i class="ph ph-printer-fill text-xl"></i></button>
+                                <button onclick="downloadResultPDF()" class="p-2 px-4 text-slate-600 hover:text-blue-500 transition-colors text-xs font-black flex items-center gap-2 border border-slate-200 rounded-xl hover:bg-blue-50">
+                                    <i class="ph ph-printer-fill text-xl"></i> Download PDF
+                                </button>
                                 <button class="p-2 text-slate-400 hover:text-blue-500 transition-colors"><i class="ph ph-share-network-fill text-xl"></i></button>
                             </div>
                         </div>
@@ -758,6 +767,52 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div id="content-analytics" class="content-section hidden fade-in max-w-6xl mx-auto">
+                        <div class="mb-10">
+                            <h1 class="text-3xl font-bold text-slate-900 tracking-tight font-professional">Analytics Dashboard</h1>
+                            <p class="text-sm font-medium text-slate-500">Visual breakdown of grading performance across all assessments.</p>
+                        </div>
+
+                        <!-- Stat Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                            <div class="premium-card p-6 bg-white flex flex-col gap-2">
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Total Graded</p>
+                                <p class="text-4xl font-black text-slate-900" id="an-total">0</p>
+                            </div>
+                            <div class="premium-card p-6 bg-white flex flex-col gap-2">
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Class Average</p>
+                                <p class="text-4xl font-black text-blue-600" id="an-avg">0%</p>
+                            </div>
+                            <div class="premium-card p-6 bg-white flex flex-col gap-2">
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Highest Score</p>
+                                <p class="text-4xl font-black text-emerald-600" id="an-high">0%</p>
+                            </div>
+                            <div class="premium-card p-6 bg-white flex flex-col gap-2">
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Needs Review</p>
+                                <p class="text-4xl font-black text-amber-500" id="an-review">0</p>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Score Distribution</h3>
+                                <canvas id="chart-distribution" height="220"></canvas>
+                            </div>
+                            <div class="premium-card p-8 bg-white">
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Grade Band Breakdown</h3>
+                                <canvas id="chart-grades" height="220"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Score Timeline -->
+                        <div class="premium-card p-8 bg-white">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Scores Over Time</h3>
+                            <canvas id="chart-timeline" height="100"></canvas>
                         </div>
                     </div>
 

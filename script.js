@@ -685,3 +685,141 @@ document.getElementById('create-assessment-form').addEventListener('submit', asy
         dropzones.forEach(id => document.getElementById(id).classList.remove('pointer-events-none', 'opacity-50'));
     }
 });
+
+// ══════════════════════════════════════════════
+// PHASE 3: ANALYTICS DASHBOARD
+// ══════════════════════════════════════════════
+
+let chartDistribution = null;
+let chartGrades       = null;
+let chartTimeline     = null;
+
+function renderAnalytics() {
+    const data = recentAssessments;
+
+    // Stat cards
+    const total   = data.length;
+    const avgPct  = total ? Math.round(data.reduce((s, a) => s + (a.result?.percentage || 0), 0) / total) : 0;
+    const highPct = total ? Math.round(Math.max(...data.map(a => a.result?.percentage || 0))) : 0;
+    const reviews = data.reduce((s, a) => s + ((a.result?.questionResults || []).filter(q => q.needsReview).length), 0);
+
+    document.getElementById('an-total').innerText  = total;
+    document.getElementById('an-avg').innerText    = avgPct + '%';
+    document.getElementById('an-high').innerText   = highPct + '%';
+    document.getElementById('an-review').innerText = reviews;
+
+    // ── Score Distribution (Bar chart: buckets 0-20, 21-40, 41-60, 61-80, 81-100)
+    const buckets = [0, 0, 0, 0, 0];
+    data.forEach(a => {
+        const p = a.result?.percentage || 0;
+        if (p <= 20) buckets[0]++;
+        else if (p <= 40) buckets[1]++;
+        else if (p <= 60) buckets[2]++;
+        else if (p <= 80) buckets[3]++;
+        else buckets[4]++;
+    });
+
+    if (chartDistribution) chartDistribution.destroy();
+    chartDistribution = new Chart(document.getElementById('chart-distribution'), {
+        type: 'bar',
+        data: {
+            labels: ['0–20%', '21–40%', '41–60%', '61–80%', '81–100%'],
+            datasets: [{
+                label: 'Students',
+                data: buckets,
+                backgroundColor: ['#f87171','#fb923c','#facc15','#34d399','#60a5fa'],
+                borderRadius: 10,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    // ── Grade Band Doughnut
+    const grades = { 'A+ (≥90)': 0, 'A (80-89)': 0, 'B+ (70-79)': 0, 'B (60-69)': 0, 'C (50-59)': 0, 'F (<50)': 0 };
+    data.forEach(a => {
+        const p = a.result?.percentage || 0;
+        if (p >= 90) grades['A+ (≥90)']++;
+        else if (p >= 80) grades['A (80-89)']++;
+        else if (p >= 70) grades['B+ (70-79)']++;
+        else if (p >= 60) grades['B (60-69)']++;
+        else if (p >= 50) grades['C (50-59)']++;
+        else grades['F (<50)']++;
+    });
+
+    if (chartGrades) chartGrades.destroy();
+    chartGrades = new Chart(document.getElementById('chart-grades'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(grades),
+            datasets: [{
+                data: Object.values(grades),
+                backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#f97316','#ef4444'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11, weight: 'bold' } } } }
+        }
+    });
+
+    // ── Score Timeline (Line chart)
+    const sorted = [...data].reverse();
+    if (chartTimeline) chartTimeline.destroy();
+    chartTimeline = new Chart(document.getElementById('chart-timeline'), {
+        type: 'line',
+        data: {
+            labels: sorted.map((a, i) => a.studentName || `#${i+1}`),
+            datasets: [{
+                label: 'Score %',
+                data: sorted.map(a => Math.round(a.result?.percentage || 0)),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.08)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#3b82f6',
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+            }
+        }
+    });
+}
+
+// ── Override navigate to hook analytics rendering
+const _originalNavigate = navigate;
+window.navigate = function(page) {
+    _originalNavigate(page);
+    if (page === 'analytics') renderAnalytics();
+};
+
+// ══════════════════════════════════════════════
+// PHASE 3: PDF / PRINT REPORT
+// ══════════════════════════════════════════════
+
+function downloadResultPDF() {
+    const style = document.createElement('style');
+    style.id = 'sage-print-style';
+    style.innerHTML = `
+        @media print {
+            body * { visibility: hidden; }
+            #content-results, #content-results * { visibility: visible; }
+            #content-results { position: absolute; inset: 0; padding: 32px; }
+            .sapphire-gradient { background: #1d4ed8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            button { display: none !important; }
+        }
+    `;
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(() => document.getElementById('sage-print-style')?.remove(), 1000);
+}
