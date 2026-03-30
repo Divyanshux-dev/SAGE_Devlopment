@@ -591,7 +591,7 @@ function fileToBase64(file) {
     });
 }
 
-// 2. Update the Form Submission Logic to async
+// 2. Grading Form Submit — Phase 2: Queue + SSE
 document.getElementById('create-assessment-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -608,22 +608,12 @@ document.getElementById('create-assessment-form').addEventListener('submit', asy
     
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalHTML = submitBtn.innerHTML;
-    
-    // 3. Lock the UI State (Pre-Processing)
-    submitBtn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> <span>AI is Analyzing...</span>`;
+
+    submitBtn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> <span>Preparing Files...</span>`;
     submitBtn.disabled = true;
     submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
-    // Disable or hide the 'remove' buttons
-    const removeBtns = ['remove-qp', 'remove-ak', 'remove-ss'];
-    removeBtns.forEach(id => document.getElementById(id).classList.add('hidden'));
-
-    // Disable dropzone inputs
-    const dropzones = ['dropzone-qp', 'dropzone-ak', 'dropzone-ss'];
-    dropzones.forEach(id => document.getElementById(id).classList.add('pointer-events-none', 'opacity-50'));
-    
     try {
-        // 4. Generate the Payload
         const [qpBase64, akBase64, ssBase64] = await Promise.all([
             fileToBase64(uploadedFiles.qp),
             fileToBase64(uploadedFiles.ak),
@@ -631,57 +621,125 @@ document.getElementById('create-assessment-form').addEventListener('submit', asy
         ]);
 
         const gradingPayload = {
-            courseCode:      courseCode,
-            assessmentName:  assessmentName,
-            studentName:     document.getElementById('student-name').value.trim(),
-            enrollmentNo:    document.getElementById('enrollment-no').value.trim(),
-            totalMarks:      parseInt(document.getElementById('total-marks').value) || 0,
-            totalQuestions:  parseInt(document.getElementById('total-questions').value) || 0,
-            files: {
-                questionPaper: qpBase64,
-                answerKey:     akBase64,
-                studentSheet:  ssBase64
-            }
+            courseCode,
+            assessmentName,
+            studentName:    document.getElementById('student-name').value.trim(),
+            enrollmentNo:   document.getElementById('enrollment-no').value.trim(),
+            totalMarks:     parseInt(document.getElementById('total-marks').value) || 0,
+            totalQuestions: parseInt(document.getElementById('total-questions').value) || 0,
+            files: { questionPaper: qpBase64, answerKey: akBase64, studentSheet: ssBase64 }
         };
 
-        // 5. Send Payload to Backend
-        console.log("Sending Payload to Backend...");
+        // POST to queue — server returns 202 immediately with jobId
         const response = await fetch('http://localhost:3000/api/grade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(gradingPayload)
         });
 
-        if (!response.ok) {
-            throw new Error(`Server returned status ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Server error ${response.status}`);
 
-        const newAssessmentData = await response.json();
-        console.log("Final Grading Results:", newAssessmentData);
-        
-        // Push and populate without reloading
-        recentAssessments.unshift(newAssessmentData);
-        populateTable();
-        
-        // Clear forms
-        document.getElementById('create-assessment-form').reset();
-        document.getElementById('remove-qp').click();
-        document.getElementById('remove-ak').click();
-        document.getElementById('remove-ss').click();
-        
-        // Visually load the results page
-        renderResults(newAssessmentData.result, newAssessmentData.name, newAssessmentData.studentName, newAssessmentData.enrollmentNo, newAssessmentData.courseCode);
-        
-    } catch (error) {
-        console.error("Error during file conversion:", error);
-        alert("An error occurred while preparing the files for AI processing. " + error.message);
-    } finally {
-        // Unlock the UI State
+        const { jobId } = await response.json();
+        console.log(`[SAGE] Job queued: ${jobId}`);
+
+        // Unlock the form immediately — user is free to continue
         submitBtn.innerHTML = originalHTML;
         submitBtn.disabled = false;
         submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
 
-        removeBtns.forEach(id => document.getElementById(id).classList.remove('hidden'));
-        dropzones.forEach(id => document.getElementById(id).classList.remove('pointer-events-none', 'opacity-50'));
+        // Reset the form fields + file zones
+        document.getElementById('create-assessment-form').reset();
+        ['remove-qp','remove-ak','remove-ss'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.click();
+        });
+
+        // Show floating toast + open SSE stream
+        showGradingToast(jobId, assessmentName || 'Assessment');
+        listenForJobResult(jobId);
+
+    } catch (error) {
+        console.error("Queue submission error:", error);
+        alert("Failed to submit for grading: " + error.message);
+        submitBtn.innerHTML = originalHTML;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
     }
 });
+
+// ──────────────────────────────────────────────
+// SSE Job Listener
+// ──────────────────────────────────────────────
+function listenForJobResult(jobId) {
+    const evtSource = new EventSource(`http://localhost:3000/api/grade/status/${jobId}`);
+
+    evtSource.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(`[SAGE SSE] ${jobId}:`, data.status);
+
+        if (data.status === 'done') {
+            evtSource.close();
+            dismissGradingToast(jobId);
+            const result = data.result;
+            recentAssessments.unshift(result);
+            populateTable();
+            renderResults(result.result, result.name, result.studentName, result.enrollmentNo, result.courseCode);
+        } else if (data.status === 'error') {
+            evtSource.close();
+            dismissGradingToast(jobId);
+            alert('SAGE Grading Error: ' + data.error);
+        } else {
+            updateGradingToast(jobId, data.status);
+        }
+    };
+
+    evtSource.onerror = function() {
+        evtSource.close();
+        dismissGradingToast(jobId);
+    };
+}
+
+// ──────────────────────────────────────────────
+// Floating Toast Notifications
+// ──────────────────────────────────────────────
+const toasts = {};
+
+function showGradingToast(jobId, assessmentName) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:12px;';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.id = `toast-${jobId}`;
+    toast.style.cssText = 'background:#1e293b;color:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);display:flex;align-items:center;gap:14px;min-width:300px;border:1px solid rgba(255,255,255,0.08);transition:all 0.3s ease;';
+    toast.innerHTML = `
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ph ph-spinner" style="animation:spin 1s linear infinite;font-size:18px;"></i>
+        </div>
+        <div style="flex:1;">
+            <p style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;">SAGE AI Processing</p>
+            <p style="font-size:13px;font-weight:700;color:#f1f5f9;" id="toast-text-${jobId}">${assessmentName} — Queued</p>
+        </div>
+    `;
+    container.appendChild(toast);
+    toasts[jobId] = toast;
+}
+
+function updateGradingToast(jobId, status) {
+    const textEl = document.getElementById(`toast-text-${jobId}`);
+    const labels = { queued: 'Queued…', processing: 'AI is grading your paper…' };
+    if (textEl) textEl.innerText = labels[status] || status;
+}
+
+function dismissGradingToast(jobId) {
+    const toast = toasts[jobId];
+    if (toast) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(120%)';
+        setTimeout(() => toast.remove(), 400);
+        delete toasts[jobId];
+    }
+}
