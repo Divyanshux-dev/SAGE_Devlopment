@@ -12,18 +12,24 @@ function getStatusBadge(status, color) {
 
 async function loadAssessments() {
     try {
-        const res = await fetch('http://localhost:3000/api/assessments');
+        const token = localStorage.getItem('sage_token');
+        if (!token) return;
+        const res = await fetch('http://localhost:3000/api/assessments', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
         if (res.ok) {
             recentAssessments = await res.json();
             populateTable();
+        } else if (res.status === 401) {
+            logout();
         }
     } catch(e) { console.error("Could not load assessments"); }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadAssessments();
-    const isLoggedIn = localStorage.getItem('sage_session_active');
-    if (isLoggedIn === 'true') {
+    const token = localStorage.getItem('sage_token');
+    if (token) {
+        await loadAssessments();
         showView('main');
         navigate('dashboard');
     } else {
@@ -34,26 +40,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('last-login-date').innerText = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
 });
 
-document.getElementById('login-form').addEventListener('submit', function(e) {
+document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     
     if(email && password) {
-        document.getElementById('login-error').classList.add('hidden');
-        localStorage.setItem('sage_session_active', 'true');
-        
         const btn = this.querySelector('button');
         const origText = btn.innerHTML;
         btn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Authenticating...`;
         
-        setTimeout(() => {
+        try {
+            const res = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                document.getElementById('login-error').classList.add('hidden');
+                localStorage.setItem('sage_token', data.token);
+                if(data.user) {
+                    const profileNameEls = document.querySelectorAll('.profile-name, #profile-dropdown p.font-medium');
+                    profileNameEls.forEach(el => el.innerText = data.user.name);
+                }
+                
+                btn.innerHTML = origText;
+                this.reset();
+                await loadAssessments();
+                showView('main');
+                navigate('dashboard');
+            } else {
+                document.getElementById('login-error').innerText = data.error || "Login failed";
+                document.getElementById('login-error').classList.remove('hidden');
+                btn.innerHTML = origText;
+            }
+        } catch(err) {
+            document.getElementById('login-error').innerText = "Network error. Please try again.";
+            document.getElementById('login-error').classList.remove('hidden');
             btn.innerHTML = origText;
-            this.reset();
-            showView('main');
-            navigate('dashboard');
-            populateTable();
-        }, 600);
+        }
     } else {
         document.getElementById('login-error').classList.remove('hidden');
     }
@@ -88,7 +115,7 @@ function navigate(page) {
 }
 
 function logout() {
-    localStorage.removeItem('sage_session_active');
+    localStorage.removeItem('sage_token');
     showView('login');
 }
 
@@ -523,7 +550,10 @@ if (btnGenerateAi) {
         try {
             const response = await fetch('http://localhost:3000/api/generate', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('sage_token')
+                },
                 body: JSON.stringify({ topic, difficulty })
             });
 
@@ -648,7 +678,10 @@ document.getElementById('create-assessment-form').addEventListener('submit', asy
         console.log("Sending Payload to Backend...");
         const response = await fetch('http://localhost:3000/api/grade', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('sage_token')
+            },
             body: JSON.stringify(gradingPayload)
         });
 

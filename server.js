@@ -3,44 +3,79 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
-const fs = require('fs');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 
+const User = require('./models/User');
+const Assessment = require('./models/Assessment');
+
 const app = express();
-
-const dataFile = path.join(__dirname, 'data.json');
-
-// Helper to read/write JSON db
-function readDB() {
-    if (!fs.existsSync(dataFile)) return [];
-    try {
-        const raw = fs.readFileSync(dataFile, 'utf-8');
-        return JSON.parse(raw);
-    } catch { return []; }
-}
-
-function writeDB(data) {
-    fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-}
-
-// GET all assessments
-app.get('/api/assessments', (req, res) => {
-    res.json(readDB());
-});
 const port = 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sage_key_v1';
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-
-// Serve static frontend files (index.html, script.js, styling)
 app.use(express.static(__dirname));
 
-// Initialize the Gemini client
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/sage_db')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Authentication Routes
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password, name, institution } = req.body;
+        const userExists = await User.findOne({ email });
+        if (userExists) return res.status(400).json({ error: 'User already exists' });
+        
+        const user = new User({ email, password, name, institution });
+        await user.save();
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        // Auto-create demo user if they enter demo credentials for the first time
+        if (!user && password === 'demo123') {
+             const demoUser = new User({ email, password, name: 'Dr. Nishant Jain' });
+             await demoUser.save();
+             const token = jwt.sign({ id: demoUser._id, name: demoUser.name, email: demoUser.email }, JWT_SECRET, { expiresIn: '7d' });
+             return res.json({ token, user: { name: demoUser.name, email: demoUser.email } });
+        }
+
+        if (!user || !(await user.comparePassword(password))) {
+             return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        const token = jwt.sign({ id: user._id, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, user: { name: user.name, email: user.email } });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+const authenticate = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) { return res.status(401).json({ error: 'Invalid token' }); }
+};
+
+app.get('/api/assessments', authenticate, async (req, res) => {
+    try {
+        const assessments = await Assessment.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        res.json(assessments);
+    } catch(err) { res.status(500).json({ error: err.message }); }
+});
 
 function prepareBase64File(dataUri) {
     if (!dataUri) return null;
-    // Data URIs from FileReader look like: data:image/png;base64,iVBORw0KGgo...
     const matches = dataUri.match(/^data:(.+?);base64,(.+)$/);
     if (matches && matches.length === 3) {
         return {
@@ -53,7 +88,7 @@ function prepareBase64File(dataUri) {
     return null;
 }
 
-app.post('/api/grade', async (req, res) => {
+app.post('/api/grade', authenticate, async (req, res) => {
     try {
         const { courseCode, assessmentName, studentName, enrollmentNo, totalMarks, totalQuestions, files } = req.body;
         
@@ -142,32 +177,28 @@ GRADING RULES:
             }
         });
 
-        const resultText = response.text;
-        const jsonResult = JSON.parse(resultText);
-        
-        const db = readDB();
+        const jsonResult = JSON.parse(response.text);
         
         let color = 'gray';
         if (jsonResult.percentage >= 75) color = 'green';
         else if (jsonResult.percentage >= 50) color = 'blue';
         else color = 'yellow';
 
-        const newAssessment = {
-            id:            (courseCode || 'AI').toUpperCase().substring(0, 8),
-            name:          assessmentName || 'Graded Assessment',
-            studentName:   studentName    || 'Unknown Student',
-            enrollmentNo:  enrollmentNo   || 'N/A',
-            courseCode:    courseCode     || '',
-            date:          new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-            papers:        1,
-            status:        'Graded',
-            color:         color,
-            result:        jsonResult
-        };
+        const newAssessment = new Assessment({
+            userId: req.user.id,
+            id: (courseCode || 'AI').toUpperCase().substring(0, 8),
+            name: assessmentName || 'Graded Assessment',
+            studentName: studentName || 'Unknown Student',
+            enrollmentNo: enrollmentNo || 'N/A',
+            courseCode: courseCode || '',
+            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            papers: 1,
+            status: 'Graded',
+            color: color,
+            result: jsonResult
+        });
 
-        db.unshift(newAssessment);
-        writeDB(db);
-
+        await newAssessment.save();
         res.json(newAssessment);
 
     } catch (error) {
@@ -176,8 +207,7 @@ GRADING RULES:
     }
 });
 
-app.post('/api/generate', async (req, res) => {
-
+app.post('/api/generate', authenticate, async (req, res) => {
     try {
         const { topic, difficulty } = req.body;
         if (!topic) return res.status(400).json({ error: "Missing topic." });
