@@ -573,14 +573,34 @@ if (btnGenerateAi) {
                 document.getElementById('assessment-name').value = `${topic} Assessment`;
             }
             
-            // Mocking the file upload to the Answer Key Dropzone automatically
-            const mockFile = new File([generatedText], `SAGE_AI_${topic.replace(/\s+/g, '_')}_Key.txt`, { type: 'text/plain' });
+            // Split generated text into QP and AK based on the prompt's defined headings
+            const qpMatch = generatedText.match(/1\.?\s*QUESTION PAPER:?\s*([\s\S]*?)(?=2\.?\s*MODEL ANSWER KEY:?|$)/i);
+            const akMatch = generatedText.match(/2\.?\s*MODEL ANSWER KEY:?\s*([\s\S]*)$/i);
             
-            // Manually trigger the answer key dropzone to show this file
-            uploadedFiles.ak = mockFile; 
-            document.getElementById('name-ak').textContent = mockFile.name;
-            document.getElementById('display-ak').classList.remove('hidden');
-            document.getElementById('display-ak').classList.add('inline-flex');
+            const qpText = qpMatch ? qpMatch[1].trim() : generatedText;
+            const akText = akMatch ? akMatch[1].trim() : generatedText;
+
+            // Trigger the Question Paper dropzone
+            const mockFileQP = new File([qpText], `SAGE_AI_${topic.replace(/\s+/g, '_')}_QP.txt`, { type: 'text/plain' });
+            uploadedFiles.qp = mockFileQP;
+            const nameQpElem = document.getElementById('name-qp');
+            if (nameQpElem) nameQpElem.textContent = mockFileQP.name;
+            const displayQpElem = document.getElementById('display-qp');
+            if (displayQpElem) {
+                displayQpElem.classList.remove('hidden');
+                displayQpElem.classList.add('inline-flex');
+            }
+
+            // Trigger the Answer Key dropzone
+            const mockFileAK = new File([akText], `SAGE_AI_${topic.replace(/\s+/g, '_')}_Key.txt`, { type: 'text/plain' });
+            uploadedFiles.ak = mockFileAK; 
+            const nameAkElem = document.getElementById('name-ak');
+            if (nameAkElem) nameAkElem.textContent = mockFileAK.name;
+            const displayAkElem = document.getElementById('display-ak');
+            if (displayAkElem) {
+                displayAkElem.classList.remove('hidden');
+                displayAkElem.classList.add('inline-flex');
+            }
             
         } catch (error) {
             errorText.innerText = "SAGE AI encountered a communication error. Please try again.";

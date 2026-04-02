@@ -193,7 +193,10 @@ app.post('/api/auth/login', async (req, res) => {
         }
         const token = jwt.sign({ id: user._id, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ token, user: { name: user.name, email: user.email } });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+        console.error("Login route error:", err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 const authenticate = (req, res, next) => {
@@ -273,7 +276,7 @@ Format clearly into:
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: [prompt],
+            contents: prompt,
             config: { systemInstruction: "You are an academic assistant. Keep formatting clean." }
         });
 
