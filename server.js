@@ -1,4 +1,5 @@
 // v1 by divyanshu
+// Phase 1+2: MongoDB + JWT Auth + In-memory background grading queue with SSE push notifications
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -14,6 +15,144 @@ const app = express();
 const port = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sage_key_v1';
 
+// ──────────────────────────────────────────────
+// Simple In-Memory Job Queue (Phase 2)
+// ──────────────────────────────────────────────
+const jobQueue = [];        // pending jobs
+const jobs = new Map();     // jobId → { status, result, error }
+const sseClients = new Map(); // jobId → res (SSE stream)
+
+let queueRunning = false;
+
+function pushSSE(jobId, data) {
+    const client = sseClients.get(jobId);
+    if (client) {
+        client.write(`data: ${JSON.stringify(data)}\n\n`);
+        if (data.status === 'done' || data.status === 'error') {
+            client.end();
+            sseClients.delete(jobId);
+        }
+    }
+}
+
+async function processQueue() {
+    if (queueRunning) return;
+    queueRunning = true;
+
+    while (jobQueue.length > 0) {
+        const job = jobQueue.shift();
+        const { jobId, payload, userId } = job;
+
+        jobs.set(jobId, { status: 'processing' });
+        pushSSE(jobId, { status: 'processing', jobId });
+
+        try {
+            const result = await runGrading(payload, userId);
+            jobs.set(jobId, { status: 'done', result });
+            pushSSE(jobId, { status: 'done', jobId, result });
+        } catch (err) {
+            jobs.set(jobId, { status: 'error', error: err.message });
+            pushSSE(jobId, { status: 'error', jobId, error: err.message });
+        }
+    }
+
+    queueRunning = false;
+}
+
+// ──────────────────────────────────────────────
+// Gemini Grading Logic (Extracted Worker Function)
+// ──────────────────────────────────────────────
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+function prepareBase64File(dataUri) {
+    if (!dataUri) return null;
+    const matches = dataUri.match(/^data:(.+?);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+        return { inlineData: { mimeType: matches[1], data: matches[2] } };
+    }
+    return null;
+}
+
+async function runGrading(payload, userId) {
+    const { courseCode, assessmentName, studentName, enrollmentNo, totalMarks, totalQuestions, files } = payload;
+
+    const qpPart = prepareBase64File(files.questionPaper);
+    const akPart = prepareBase64File(files.answerKey);
+    const ssPart = prepareBase64File(files.studentSheet);
+
+    if (!qpPart || !akPart || !ssPart) throw new Error("Invalid file format.");
+
+    const jsonSchema = {
+        type: "OBJECT",
+        properties: {
+            totalScore:      { type: "NUMBER" },
+            maxTotalScore:   { type: "NUMBER" },
+            percentage:      { type: "NUMBER" },
+            overallFeedback: { type: "STRING" },
+            questionResults: {
+                type: "ARRAY",
+                items: {
+                    type: "OBJECT",
+                    properties: {
+                        questionNumber:  { type: "NUMBER" },
+                        questionText:    { type: "STRING" },
+                        maxMarks:        { type: "NUMBER" },
+                        marksAwarded:    { type: "NUMBER" },
+                        conceptAnalysis: { type: "STRING" },
+                        studentLogic:    { type: "STRING" },
+                        feedback:        { type: "STRING" },
+                        confidence:      { type: "STRING" },
+                        needsReview:     { type: "BOOLEAN" }
+                    },
+                    required: ["questionNumber", "maxMarks", "marksAwarded", "conceptAnalysis", "studentLogic", "feedback", "confidence", "needsReview"]
+                }
+            }
+        },
+        required: ["totalScore", "maxTotalScore", "percentage", "overallFeedback", "questionResults"]
+    };
+
+    const systemInstruction = `You are SAGE, a strict but fair academic grading assistant used by university faculty in India.
+CONTEXT:
+- Student: ${studentName || 'Unknown'}, Enrollment: ${enrollmentNo || 'Unknown'}
+- Course: ${courseCode || 'Unknown'}, Assessment: ${assessmentName || 'Unknown'}
+- Total Marks: ${totalMarks || 'Determine from paper'}, Questions: ${totalQuestions || 'Determine from paper'}
+RULES: Grade semantically. Use chain-of-thought. marksAwarded must be 0–maxMarks. Set needsReview=true if uncertain ±1 mark.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [{ role: 'user', parts: [
+            { text: `Grade submission for: "${assessmentName || 'Assessment'}"` },
+            { text: "QUESTION PAPER:" }, qpPart,
+            { text: "MODEL ANSWER KEY:" }, akPart,
+            { text: "STUDENT ANSWER SHEET:" }, ssPart
+        ]}],
+        config: { systemInstruction, responseMimeType: "application/json", responseSchema: jsonSchema }
+    });
+
+    const jsonResult = JSON.parse(response.text);
+    let color = jsonResult.percentage >= 75 ? 'green' : jsonResult.percentage >= 50 ? 'blue' : 'yellow';
+
+    const newAssessment = new Assessment({
+        userId: userId,
+        id: (courseCode || 'AI').toUpperCase().substring(0, 8),
+        name: assessmentName || 'Graded Assessment',
+        studentName: studentName || 'Unknown Student',
+        enrollmentNo: enrollmentNo || 'N/A',
+        courseCode: courseCode || '',
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        papers: 1,
+        status: 'Graded',
+        color: color,
+        result: jsonResult
+    });
+
+    await newAssessment.save();
+    return newAssessment;
+}
+
+// ──────────────────────────────────────────────
+// Express Middleware & Static
+// ──────────────────────────────────────────────
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
@@ -22,15 +161,15 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/sage_db')
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
+// ──────────────────────────────────────────────
 // Authentication Routes
+// ──────────────────────────────────────────────
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password, name, institution } = req.body;
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ error: 'User already exists' });
-        
+
         const user = new User({ email, password, name, institution });
         await user.save();
         res.status(201).json({ message: 'User registered successfully' });
@@ -67,6 +206,9 @@ const authenticate = (req, res, next) => {
     } catch (err) { return res.status(401).json({ error: 'Invalid token' }); }
 };
 
+// ──────────────────────────────────────────────
+// API Routes
+// ──────────────────────────────────────────────
 app.get('/api/assessments', authenticate, async (req, res) => {
     try {
         const assessments = await Assessment.find({ userId: req.user.id }).sort({ createdAt: -1 });
@@ -74,160 +216,67 @@ app.get('/api/assessments', authenticate, async (req, res) => {
     } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-function prepareBase64File(dataUri) {
-    if (!dataUri) return null;
-    const matches = dataUri.match(/^data:(.+?);base64,(.+)$/);
-    if (matches && matches.length === 3) {
-        return {
-            inlineData: {
-                mimeType: matches[1],
-                data: matches[2]
-            }
-        };
-    }
-    return null;
-}
-
+// Submit a grading job — returns immediately with a jobId (Phase 2: async queue)
 app.post('/api/grade', authenticate, async (req, res) => {
-    try {
-        const { courseCode, assessmentName, studentName, enrollmentNo, totalMarks, totalQuestions, files } = req.body;
-        
-        if (!files || !files.questionPaper || !files.answerKey || !files.studentSheet) {
-            return res.status(400).json({ error: "Missing required files." });
-        }
+    const { files } = req.body;
 
-        console.log(`Received grading request for ${courseCode || 'Unknown'}: ${assessmentName || 'Unknown'}`);
-
-        const qpPart = prepareBase64File(files.questionPaper);
-        const akPart = prepareBase64File(files.answerKey);
-        const ssPart = prepareBase64File(files.studentSheet);
-
-        if (!qpPart || !akPart || !ssPart) {
-             return res.status(400).json({ error: "Invalid file format. Must be base64 data URIs." });
-        }
-
-        const jsonSchema = {
-            type: "OBJECT",
-            properties: {
-                totalScore:    { type: "NUMBER" },
-                maxTotalScore: { type: "NUMBER" },
-                percentage:    { type: "NUMBER" },
-                overallFeedback: { type: "STRING" },
-                questionResults: {
-                    type: "ARRAY",
-                    items: {
-                        type: "OBJECT",
-                        properties: {
-                            questionNumber:  { type: "NUMBER" },
-                            questionText:    { type: "STRING" },
-                            maxMarks:        { type: "NUMBER" },
-                            marksAwarded:    { type: "NUMBER" },
-                            conceptAnalysis: { type: "STRING" },
-                            studentLogic:    { type: "STRING" },
-                            feedback:        { type: "STRING" },
-                            confidence:      { type: "STRING" },
-                            needsReview:     { type: "BOOLEAN" }
-                        },
-                        required: ["questionNumber", "maxMarks", "marksAwarded", "conceptAnalysis", "studentLogic", "feedback", "confidence", "needsReview"]
-                    }
-                }
-            },
-            required: ["totalScore", "maxTotalScore", "percentage", "overallFeedback", "questionResults"]
-        };
-
-        const systemInstruction = `You are SAGE, a strict but fair academic grading assistant used by university faculty in India.
-
-CONTEXT FOR THIS GRADING SESSION:
-- Student Name:      ${studentName || 'Unknown'}
-- Enrollment Number: ${enrollmentNo || 'Unknown'}
-- Course Code:       ${courseCode || 'Unknown'}
-- Assessment:        ${assessmentName || 'Unknown'}
-- Total Marks:       ${totalMarks || 'Determine from question paper'}
-- Total Questions:   ${totalQuestions || 'Determine from question paper'}
-
-GRADING RULES:
-1. Read the Question Paper carefully to identify EACH question and its allocated marks (e.g., "Q1 (5 marks)"). If marks are not explicitly stated, distribute ${totalMarks || 'the total'} marks evenly across ${totalQuestions || 'all'} questions.
-2. For EACH question, compare the student's answer strictly against the Model Answer Key.
-3. Grade semantically — correct understanding with different wording is still correct. Rote copying without understanding is penalized.
-4. Use Chain-of-Thought: first complete conceptAnalysis (what the ideal answer requires), then studentLogic (what the student actually wrote and where they went right/wrong), then assign marksAwarded.
-5. marksAwarded MUST be between 0 and maxMarks for that question. Never award more than maxMarks.
-6. For confidence: use "HIGH" if the handwriting/text is clear, "MEDIUM" if some parts are unclear, "LOW" if illegible or ambiguous.
-7. Set needsReview=true if handwriting is very unclear, the answer is borderline, or you are uncertain within ±1 mark.
-8. overallFeedback should be a single honest, encouraging sentence a teacher would write on a report card.
-9. totalScore = sum of all marksAwarded. maxTotalScore = sum of all maxMarks. percentage = (totalScore/maxTotalScore)*100 rounded to 2 decimal places.`;
-
-
-        const contentParts = [
-            { text: `Grade this student's submission for the assessment: "${assessmentName || 'Assessment'}".` },
-            { text: "QUESTION PAPER (read to identify all questions and their marks):" },
-            qpPart,
-            { text: "MODEL ANSWER KEY (use as the marking rubric — this defines what a correct answer looks like):" },
-            akPart,
-            { text: "STUDENT ANSWER SHEET (this is what must be graded — compare each answer against the key):" },
-            ssPart
-        ];
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [{ role: 'user', parts: contentParts }],
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: jsonSchema
-            }
-        });
-
-        const jsonResult = JSON.parse(response.text);
-        
-        let color = 'gray';
-        if (jsonResult.percentage >= 75) color = 'green';
-        else if (jsonResult.percentage >= 50) color = 'blue';
-        else color = 'yellow';
-
-        const newAssessment = new Assessment({
-            userId: req.user.id,
-            id: (courseCode || 'AI').toUpperCase().substring(0, 8),
-            name: assessmentName || 'Graded Assessment',
-            studentName: studentName || 'Unknown Student',
-            enrollmentNo: enrollmentNo || 'N/A',
-            courseCode: courseCode || '',
-            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-            papers: 1,
-            status: 'Graded',
-            color: color,
-            result: jsonResult
-        });
-
-        await newAssessment.save();
-        res.json(newAssessment);
-
-    } catch (error) {
-        console.error("Error during AI grading:", error);
-        res.status(500).json({ error: error.message || "Failed to process grading." });
+    if (!files || !files.questionPaper || !files.answerKey || !files.studentSheet) {
+        return res.status(400).json({ error: "Missing required files." });
     }
+
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    jobs.set(jobId, { status: 'queued' });
+    jobQueue.push({ jobId, payload: req.body, userId: req.user.id });
+
+    console.log(`[QUEUE] Enqueued job ${jobId} for ${req.body.studentName}`);
+    res.status(202).json({ jobId, status: 'queued' });
+
+    // Kick off the queue processor (non-blocking)
+    processQueue();
+});
+
+// SSE stream — browser connects here to get live job status
+app.get('/api/grade/status/:jobId', authenticate, (req, res) => {
+    const { jobId } = req.params;
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    // If job already finished, send immediately
+    const job = jobs.get(jobId);
+    if (job && (job.status === 'done' || job.status === 'error')) {
+        res.write(`data: ${JSON.stringify({ ...job, jobId })}\n\n`);
+        res.end();
+        return;
+    }
+
+    // Register SSE client and wait
+    sseClients.set(jobId, res);
+    res.write(`data: ${JSON.stringify({ status: job?.status || 'queued', jobId })}\n\n`);
+
+    req.on('close', () => {
+        sseClients.delete(jobId);
+    });
 });
 
 app.post('/api/generate', authenticate, async (req, res) => {
     try {
         const { topic, difficulty } = req.body;
         if (!topic) return res.status(400).json({ error: "Missing topic." });
-        
-        const prompt = `You are SAGE, a highly intelligent Smart Assessment & Grading Engine used by university faculty. 
-Your task is to generate a short, professional academic assessment about the topic: "${topic}". 
-The difficulty level should be: ${difficulty || 'Moderate'}. 
 
-Please format your response clearly into two sections:
-1. QUESTION PAPER: Provide 3 well-thought-out questions (mix of conceptual and application).
-2. MODEL ANSWER KEY: Provide a comprehensive grading rubric and model answer for each question to be used by the automated grading engine.`;
+        const prompt = `You are SAGE. Generate a professional academic assessment on: "${topic}" at difficulty: ${difficulty || 'Moderate'}.
+Format clearly into:
+1. QUESTION PAPER: 3 well-crafted questions.
+2. MODEL ANSWER KEY: Comprehensive rubric and model answers for each.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [prompt],
-            config: {
-                systemInstruction: "You are an academic assistant. Keep formatting clean using standard text spacing."
-            }
+            config: { systemInstruction: "You are an academic assistant. Keep formatting clean." }
         });
-        
+
         res.json({ generatedText: response.text });
     } catch (error) {
         console.error("Error during AI generation:", error);
