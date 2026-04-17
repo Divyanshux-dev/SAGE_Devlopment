@@ -1,5 +1,4 @@
 // v1 by divyanshu
-// Phase 1+2: MongoDB + JWT Auth + In-memory background grading queue with SSE push notifications
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -15,9 +14,7 @@ const app = express();
 const port = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_sage_key_v1';
 
-// ──────────────────────────────────────────────
-// Simple In-Memory Job Queue (Phase 2)
-// ──────────────────────────────────────────────
+// === In-memory job queue ===
 const jobQueue = [];        // pending jobs
 const jobs = new Map();     // jobId → { status, result, error }
 const sseClients = new Map(); // jobId → res (SSE stream)
@@ -59,9 +56,7 @@ async function processQueue() {
     queueRunning = false;
 }
 
-// ──────────────────────────────────────────────
-// Gemini Grading Logic (Extracted Worker Function)
-// ──────────────────────────────────────────────
+// === Grading logic (Gemini) ===
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 function prepareBase64File(dataUri) {
@@ -150,9 +145,7 @@ RULES: Grade semantically. Use chain-of-thought. marksAwarded must be 0–maxMar
     return newAssessment;
 }
 
-// ──────────────────────────────────────────────
-// Express Middleware & Static
-// ──────────────────────────────────────────────
+// Middleware + static files
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
@@ -161,9 +154,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/sage_db')
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// ──────────────────────────────────────────────
-// Authentication Routes
-// ──────────────────────────────────────────────
+// Auth routes
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password, name, institution } = req.body;
@@ -209,9 +200,7 @@ const authenticate = (req, res, next) => {
     } catch (err) { return res.status(401).json({ error: 'Invalid token' }); }
 };
 
-// ──────────────────────────────────────────────
-// API Routes
-// ──────────────────────────────────────────────
+// API routes
 app.get('/api/assessments', authenticate, async (req, res) => {
     try {
         const assessments = await Assessment.find({ userId: req.user.id }).sort({ createdAt: -1 });
@@ -219,7 +208,7 @@ app.get('/api/assessments', authenticate, async (req, res) => {
     } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Submit a grading job — returns immediately with a jobId (Phase 2: async queue)
+// submit grading job — returns 202 with jobId
 app.post('/api/grade', authenticate, async (req, res) => {
     const { files } = req.body;
 
@@ -238,7 +227,7 @@ app.post('/api/grade', authenticate, async (req, res) => {
     processQueue();
 });
 
-// SSE stream — browser connects here to get live job status
+// SSE stream for live job status
 app.get('/api/grade/status/:jobId', authenticate, (req, res) => {
     const { jobId } = req.params;
 

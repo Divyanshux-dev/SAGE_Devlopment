@@ -444,9 +444,7 @@ function closeMobileSidebar() {
 openSidebarBtn.addEventListener('click', openMobileSidebar);
 closeSidebarBtn.addEventListener('click', closeMobileSidebar);
 overlay.addEventListener('click', closeMobileSidebar);
-// ==========================================
-// FILE UPLOAD & DRAG-AND-DROP LOGIC
-// ==========================================
+// File upload + drag-and-drop
 
 // Store our uploaded files in an object
 const uploadedFiles = {
@@ -521,9 +519,7 @@ setupDropzone('ak', 'dropzone-ak', 'file-ak', 'display-ak', 'name-ak', 'remove-a
 setupDropzone('ss', 'dropzone-ss', 'file-ss', 'display-ss', 'name-ss', 'remove-ss');
 
 
-// ==========================================
-// GEMINI AI ASSESSMENT BUILDER LOGIC
-// ==========================================
+// AI assessment builder
 
 const btnGenerateAi = document.getElementById('btn-generate-ai');
 if (btnGenerateAi) {
@@ -627,9 +623,7 @@ if (btnCopyAi) {
     });
 }
 
-// ==========================================
-// FORM SUBMISSION (AI GRADING TRIGGER)
-// ==========================================
+// Form submission — triggers grading
 
 // 1. Base64 Conversion Helper
 function fileToBase64(file) {
@@ -720,9 +714,7 @@ document.getElementById('create-assessment-form').addEventListener('submit', asy
     }
 });
 
-// ──────────────────────────────────────────────
-// SSE Job Listener
-// ──────────────────────────────────────────────
+// SSE listener for grading job updates
 function listenForJobResult(jobId) {
     const evtSource = new EventSource(`http://localhost:3000/api/grade/status/${jobId}`);
 
@@ -752,9 +744,7 @@ function listenForJobResult(jobId) {
     };
 }
 
-// ──────────────────────────────────────────────
-// Floating Toast Notifications
-// ──────────────────────────────────────────────
+// Toast notifications
 const toasts = {};
 
 function showGradingToast(jobId, assessmentName) {
